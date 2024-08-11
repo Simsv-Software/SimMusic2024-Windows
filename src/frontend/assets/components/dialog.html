@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html data-window-id="mainWin">
+	<head>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="dialog.css">
+	</head>
+	<body>
+		
+
+		<!-- 主体内容 -->
+
+		<header>
+			<i onclick="cancelDialog()" id="closeBtn">&#xeab8;</i>
+		</header>
+
+		<form onsubmit="submitDialog()">
+			<h1>提示</h1>
+			<div id="text"></div>
+			<input id="prompt" autofocus>
+			<div class="buttons">
+				<button class="sub" id="subBtn" type="button" onclick="cancelDialog()">取消</button>
+				<button><i>&#xEB7B;</i> 确定</button>
+			</div>
+		</form>
+		
+
+		<!-- 引入脚本 -->
+		<script>
+			const {ipcRenderer} = require("electron");
+			const queryParams = new URLSearchParams(window.location.search);
+			switch (queryParams.get("type")) {
+				case "alert":
+					document.getElementById("prompt").hidden = true;
+					document.getElementById("subBtn").hidden = true;
+					document.getElementById("text").innerText = queryParams.get("txt");
+					break;
+				case "prompt":
+					document.getElementById("prompt").placeholder = queryParams.get("txt");
+					break;
+				case "confirm":
+					document.getElementById("prompt").hidden = true;
+					document.getElementById("text").innerText = queryParams.get("txt");
+					break;
+			}
+			function submitDialog() {
+				if (event) event.preventDefault();
+				ipcRenderer.invoke("dialogSubmit", queryParams.get("parent"), queryParams.get("dialogId"), document.getElementById("prompt").value);
+				window.close();
+			}
+			function cancelDialog() {
+				if (event) event.preventDefault();
+				ipcRenderer.invoke("dialogCancel", queryParams.get("parent"));
+				window.close();
+			}
+			document.documentElement.onkeydown = e => {
+				if (e.ctrlKey && e.key != "a") e.preventDefault();
+				if (e.key == "Enter") submitDialog();
+				if (e.key == "Escape") cancelDialog();
+			}
+		</script>
+	</body>
+</html>

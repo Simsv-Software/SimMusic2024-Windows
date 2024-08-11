@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html data-window-id="mainWin">
+	<head>
+		<title>SimMusic 开发预览版</title>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="assets/components/ContextMenu.css">
+		<link rel="stylesheet" href="assets/components/SimAP.css">
+		<link rel="stylesheet" href="assets/components/SimProgress.css">
+		<link rel="stylesheet" href="assets/components/SimLRC.css">
+		<link rel="stylesheet" href="assets/main.css">
+	</head>
+	<body class="hideList">
+		
+
+		<!-- 主体内容 -->
+
+		<header>
+			<i onclick="SimAPUI.hide()" id="hidePlayerBtn">&#xeab4;</i>
+			<i onclick="WindowOps.toggleMini()" id="miniBtn">&#xeb14;</i>
+			<i onclick="WindowOps.toggleDesktop()" id="desktopBtn">&#xea7a;</i>
+			<i onclick="WindowOps.toggleLyrics()" id="lyricsBtn">词</i>
+			<i onclick="WindowOps.minimize()">&#xeaba;</i>
+			<i onclick="WindowOps.maximize()" id="maximizeBtn">&#xeab9;</i>
+			<i onclick="WindowOps.close()" id="closeBtn">&#xeab8;</i>
+		</header>
+		
+		<!-- 主界面 -->
+		<div id="homePage">
+			<!-- 左侧栏 -->
+			<div class="left">
+				<img src="assets/logo.svg">
+				<div class="leftBar">
+					<section class="title"><span>目录</span><i onclick="FolderList.add()">&#xF4B2;</i></section>
+					<section id="folderLists"></section>
+					<section class="title"><span>歌单</span><i onclick="MusicList.add()">&#xF4B2;</i></section>
+					<section id="musicLists"></section>
+					<section class="title"><span>其他</span></section>
+					<div data-page-id="searchPage" onclick="alert('加急开发中...')"><i>&#xF0D1;</i> 搜索</div>
+					<div data-page-id="settingsPage" onclick="switchRightPage('settingsPage');SettingsPage.init()"><i>&#xF0EE;</i> 设置</div>
+					<div data-page-id="aboutPage" onclick="switchRightPage('aboutPage');initAboutPage()"><i>&#xEE59;</i> 关于</div>
+				</div>
+			</div>
+			<!-- 右侧栏 -->
+			<div class="right">
+				<!-- 无任务占位Logo -->
+				<div id="rightPlaceholder">
+					<img src="assets/icon-grey.svg">
+				</div>
+				<!-- 歌单和目录 -->
+				<div id="musicListContainer" hidden>
+					<div class="musicListTitle">
+						<img id="musicListCover" onerror="this.src='assets/placeholder.svg'">
+						<section>
+							<b id="musicListName"></b>
+							<div class="details">
+								<span id="folderDir"><i>&#xED6A;</i> <span id="musicListDir"></span><br></span>
+								<i>&#xEF83;</i> <span id="musicListNum">0</span> 首歌曲&nbsp;&nbsp;&nbsp;
+								<i>&#xF20F;</i> <span id="musicListTime">--:--</span>
+							</div>
+							<div class="buttonGroup">
+								<button onclick="PlayerController.switchMusicWithList(null,getCurrentMusicList(),true)"><i>&#xF508;</i> 全部播放</button>
+								<button class="sub square" onclick="PlayerController.appendPlayList(getCurrentMusicList())"><i>&#xF00F;</i></button>
+							</div>
+						</section>
+					</div>
+					<div class="tableContainer">
+						<table>
+							<thead>
+								<tr><th></th><th>标题</th><th>艺术家</th><th>专辑</th><th>时长</th></tr>
+								<colgroup><col style="width:80px;"><col style="width:30%;"><col><col><col style="width:80px;"></colgroup>
+							</thead>
+							<tbody id="musicListContent"></tbody>
+						</table>
+					</div>
+				</div>
+				<!-- 设置页 -->
+				<div id="settingsPage" hidden>
+					<div class="header"><i>&#xF0EE;</i> 软件设置</div>
+					<div id="settingsContainer"></div>
+				</div>
+				<!-- 关于页 -->
+				<div id="aboutPage" hidden>
+					<div class="top">
+						<img src="assets/icon-blue.png">
+						<div>
+							<b>SimMusic 2024</b>
+							<div>
+								专注本地音乐播放 · 应用版本 <span id="appVersion"></span><br>
+								© 2020-2024 Simsv Software, Licenced under GPL-3.0<br>
+								<img src="assets/misc/text.png">
+							</div>
+						</div>
+					</div>
+					<div class="main">
+						<div>
+							<div><b>巨人的肩膀</b><span>本软件使用、参考或二次开发了以下项目的实现，在此表示感谢。</span></div>
+							<a>electron/electron</a>
+							<a>zhujin917/3sqrt7-context-menu</a>
+							<a>lokesh/color-thief</a>
+							<a>Remix-Design/RemixIcon</a>
+							<a>microsoft/vscode-codicons</a>
+							<a>Moriafly/SaltPlayerSource</a>
+						</div>
+						<div>
+							<div><b>相关推荐</b><span>一些其他优秀的项目。</span></div>
+							<section data-href="https://www.cnblogs.com/vinlxc/p/11347744.html">
+								<img src="assets/misc/recommend-musictag.png">
+								<div><b>音乐标签</b><span>支持批量匹配本地歌曲的元数据，可与 SimMusic 配合使用。</span></div>
+							</section>
+							<section data-href="https://vnisoft.top">
+								<img src="assets/misc/recommend-vnimusic.png">
+								<div><b>维念音乐</b><span>老牌 PC 端本地音乐播放软件。</span></div>
+							</section>
+							<section data-href="https://moriafly.com/salt-player/">
+								<img src="assets/misc/recommend-salt.png">
+								<div><b>Salt Player</b><span>数十万用户选择的 Android 端本地音乐播放器。</span></div>
+							</section>
+						</div>
+					</div>
+				</div>
+			</div>
+			</div>
+			<!-- 播放条 -->
+			<div class="bottom">
+				<div id="bottomProgressBar"></div><div class="progressBefore"></div><div class="progressAfter"></div>
+				<div class="info">
+					<div class="img" onclick="SimAPUI.show();SimAPControls.toggleList(0)"><img id="albumBottom"></div>
+					<div class="musicInfoBottom"><b>未在播放</b><div>未知艺术家</div></div>
+				</div>
+				<div class="center">
+					<div class="loopBtn" onclick="SimAPControls.toggleLoop()"><i></i></div>
+					<div class="larger" onclick="SimAPControls.prev()"><i>&#xF140;</i></div>
+					<div class="play" onclick="SimAPControls.togglePlay()"><i>&#xF508;</i><i>&#xF507;</i></div>
+					<div class="larger" onclick="SimAPControls.next()"><i>&#xF144;</i></div>
+					<div onclick="SimAPControls.toggleList(1);PlayerController.loadMusicListActive();SimAPUI.show()"><i>&#xF011;</i></div>
+				</div>
+				<div class="volume">
+					<div class="volBtnBottom">
+						<div onclick="SimAPControls.toggleMuted()"><i>&#xF2A2;</i></div>
+						<section id="volBarBottom" min="0" max="1" value="1"></section>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+		<!-- 播放器 -->
+		<div id="playPage" hidden>
+			<div class="playerContainer">
+				<div class="controls">
+					<img id="album" onerror="this.src='assets/placeholder.svg'">
+					<div class="musicInfo"><b>未在播放</b><div>未知艺术家</div></div>
+					<div class="progressControl">
+						<span id="progressCurrent">0:00</span>
+						<div id="progressBar"></div>
+						<span id="progressDuration">0:00</span>
+					</div>
+					<div class="buttons">
+						<div class="listBtn" onclick="SimAPControls.toggleList()"><i>&#xF011;</i></div>
+						<div class="loopBtn" onclick="SimAPControls.toggleLoop()"><i></i></div>
+						<div class="larger" onclick="SimAPControls.prev()"><i>&#xF140;</i></div>
+						<div class="play" onclick="SimAPControls.togglePlay()"><i>&#xF508;</i><i>&#xF507;</i></div>
+						<div class="larger" onclick="SimAPControls.next()"><i>&#xF144;</i></div>
+						<div class="volBtn" onclick="SimAPControls.toggleVolume()"><i>&#xF2A2;</i><div id="volBar" min="0" max="1" value="1"></div></div>
+						<div class="lyricsBtn" onclick="SimAPControls.toggleLyrics()"><i>&#xF201;</i></div>
+					</div>
+				</div>
+				<div class="lyrics"><div></div></div>
+				<div class="list" id="playList"></div>
+			</div>
+
+			<div id="background">
+				<div id="animationLeft"></div>
+				<div id="animationCenter"></div>
+				<div id="animationRight"></div>
+			</div>
+		</div>
+
+		<audio id="audio" hidden></audio>
+
+		<!-- 引入脚本 -->
+		<script src="assets/components/require.js"></script>
+		<script src="assets/components/ContextMenu.js"></script>
+		<script src="assets/components/PublicConfig.js"></script>
+		<script src="assets/components/SimProgress.js"></script>
+		<script src="assets/components/SimAP.js"></script>
+		<script src="assets/components/SimLRC.js"></script>
+		<script src="assets/components/dialog.js"></script>
+		<script src="assets/main.js"></script>
+	</body>
+</html>

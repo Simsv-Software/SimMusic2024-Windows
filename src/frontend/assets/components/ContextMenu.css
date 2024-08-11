@@ -1,0 +1,63 @@
+
+.context-menu {
+    position: absolute;
+    background-color: rgb(255 255 255 / .9);
+    backdrop-filter: blur(15px);
+    top: 22px;
+    width: fit-content;
+    z-index: 9;
+    box-shadow: rgb(0 0 0 / .06) 0 10px 15px, rgb(0 0 0 / .06) 0 0 15px;
+    border: solid 1px rgb(0 0 0 / .05);
+    border-radius: 5px;
+    padding: 5px 0;
+    transition: opacity .15s;
+    opacity: 0;
+}
+.context-menu .item {
+    position: relative;
+    padding: 4px 24px 5px 12px;
+    font-size: 14px;
+    background-color: transparent;
+    color: #000;
+    white-space: nowrap;
+}
+.context-menu .item:hover, .context-menu .item-focused {
+    background-color: rgba(0,0,0,.05);
+}
+.context-menu .item:not(.sub):active {
+    opacity: .8;
+    background-color: rgba(0,0,0,.05);
+}
+.context-menu .separator {
+    margin: 5px 0;
+    border: none;
+    border-top: solid 1px rgb(0 0 0 / .05);
+}
+.context-menu .disabled {
+    color: rgb(0 0 0 / .5) !important;
+    background-color: transparent !important;
+    opacity: 1 !important;
+}
+
+.context-menu .sub {
+    padding-right: 40px;
+}
+.context-menu .sub::after {
+    content: "\eab6";
+    font-family: 'windowsicon';
+    font-size: 16px;
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+	opacity:.8;
+}
+
+#context-menu-mask {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 1919810;
+}

@@ -1,0 +1,8 @@
+
+.SimLRC{position:relative;overflow-x:hidden;overflow-y:scroll;text-align:var(--align);}
+.SimLRC::before,.SimLRC::after{content:"";display:block;height:50%;}
+.SimLRC>div{color:var(--normalColor);margin:calc(var(--lineSpace) * var(--inactiveZoom)) .2em;font-size:1.5em;transform:scale(var(--inactiveZoom));transform-origin:center var(--align);transition:all .3s;}
+.SimLRC.scrolling>div{filter:none!important;}
+.SimLRC>div.active{color:var(--activeColor);transform:scale(1);margin:var(--lineSpace) .2em;}
+.SimLRC>div:hover{color:var(--hoverColor);}
+.SimLRC>div>span,.SimLRC>div>small{display:block;}

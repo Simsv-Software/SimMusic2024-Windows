@@ -1,0 +1,28 @@
+@font-face{font-family:"icon";src:url("../icon.woff2");}
+@font-face{font-family:"windowsicon";src:url("../windowsicon.ttf");}
+@font-face{font-family:"font";src:url("../font.ttf");}
+html{font-size:16px;user-select:none;font-family:"font","微软雅黑";background:#F9F9FB;}
+body{margin:0;}
+i{font-family:"icon";font-style:normal;}
+img{pointer-events:none;}
+*{box-sizing:border-box;outline:none;}
+*[hidden]{display:none!important;}
+::-webkit-scrollbar{display:none;}
+button{background:#1E9FFF;color:white;border:0;border-radius:5px;padding:0 20px;font-size:16px;transition:filter .2s;font-family:inherit;height:30px;margin-left:5px;}
+button.sub{background:#DAEFFF;color:#1E9FFF;}
+button.square{width:30px;padding:0;}
+button:hover{filter:brightness(.95);}
+button:active{filter:brightness(.9);}
+button:disabled{filter:grayscale(1)!important;}
+.buttonGroup{height:30px;display:flex;border-radius:5px;overflow:hidden;width:fit-content;}
+.buttonGroup button{border-radius:0;}
+header{position:fixed;top:0;height:35px;display:flex;justify-content:right;width:100%;z-index:100;-webkit-app-region:drag;}
+header i{font-family:"windowsicon";height:100%;width:40px;display:flex;align-items:center;justify-content:center;transition:background .2s,opacity .2s,color .2s;-webkit-app-region:no-drag;}
+header i:hover{background:rgba(0,0,0,.05);}
+header i:active{background:rgba(0,0,0,.1);opacity:.8;}
+header i#closeBtn:hover{background:#E81123;color:white;}
+header i#closeBtn:active{background:#E81123;color:rgba(255,255,255,.8);}
+form{position:fixed;inset:30px 40px;}
+form h1{margin-top:0;margin-bottom:10px;font-size:1.8em;}
+form .buttons{position:absolute;bottom:0;right:0;}
+input{background:white;padding:8px 10px;border-radius:5px;border:0;font-size:1rem;font-family:inherit;width:100%;margin:5px 0;}

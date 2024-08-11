@@ -1,0 +1,10 @@
+{
+    "name": "sim-music",
+    "version": "1.0.0",
+    "description": "SimMusic",
+    "main": "main.js",
+    "author": "Simsv Studio",
+    "dependencies": {
+        "music-metadata": "^10.0.1"
+    }
+}
