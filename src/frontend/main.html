@@ -30,12 +30,12 @@
 			<div class="left">
 				<img src="assets/logo.svg">
 				<div class="leftBar">
-					<section class="title"><span>目录</span><i onclick="FolderList.add()">&#xF4B2;</i></section>
-					<section id="folderLists"></section>
+					<span id="extBars"></span>
 					<section class="title"><span>歌单</span><i onclick="MusicList.add()">&#xF4B2;</i></section>
 					<section id="musicLists"></section>
 					<section class="title"><span>其他</span></section>
-					<div data-page-id="searchPage" onclick="alert('加急开发中...')"><i>&#xF0D1;</i> 搜索</div>
+					<div data-page-id="searchPage" onclick="Search.switchSearch()" id="searchBtn"><i>&#xF0D1;</i> 搜索</div>
+					<div data-page-id="extensionPage" onclick="switchRightPage('extensionPage')"><i>&#xF450;</i> 扩展</div>
 					<div data-page-id="settingsPage" onclick="switchRightPage('settingsPage');SettingsPage.init()"><i>&#xF0EE;</i> 设置</div>
 					<div data-page-id="aboutPage" onclick="switchRightPage('aboutPage');initAboutPage()"><i>&#xEE59;</i> 关于</div>
 				</div>
@@ -63,6 +63,14 @@
 							</div>
 						</section>
 					</div>
+					<div class="searchTitle">
+						<form class="inputGroup" onsubmit="Search.submit()">
+							<select id="searchSource"></select>
+							<input id="searchInput" placeholder="输入搜索关键字...">
+							<button id="searchSubmitBtn"><i>&#xF0D1;</i> 搜索</button>
+						</form>
+						<div id="searchSources"></div>
+					</div>
 					<div class="tableContainer">
 						<table>
 							<thead>
@@ -71,10 +79,19 @@
 							</thead>
 							<tbody id="musicListContent"></tbody>
 						</table>
+						<div id="musicListErrorOverlay"><img src="assets/icon-error.svg"><div id="musicListErrorOverlayText">还未发起搜索</div></div>
 					</div>
 				</div>
+				<!-- 扩展页 -->
+				<div id="extensionPage" class="page" hidden>
+					<div class="header">
+						<i>&#xF450;</i> 扩展程序
+						<button class="sub" onclick="ExtensionRuntime.install()"><i>&#xEC5A;</i> 安装扩展</button>
+					</div>
+					<div id="extensionContainer"></div>
+				</div>
 				<!-- 设置页 -->
-				<div id="settingsPage" hidden>
+				<div id="settingsPage" class="page" hidden>
 					<div class="header"><i>&#xF0EE;</i> 软件设置</div>
 					<div id="settingsContainer"></div>
 				</div>
@@ -85,7 +102,7 @@
 						<div>
 							<b>SimMusic 2024</b>
 							<div>
-								专注本地音乐播放 · 应用版本 <span id="appVersion"></span><br>
+								高颜值插件化音频播放器 · 应用版本 <span id="appVersion"></span><br>
 								© 2020-2024 Simsv Software, Licenced under GPL-3.0<br>
 								<img src="assets/misc/text.png">
 							</div>

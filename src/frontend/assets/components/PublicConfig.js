@@ -1,6 +1,5 @@
 
 const defaultConfig = {
-	folderLists: [],
 	musicLists: {},
 	playList: [],
 	currentMusic: null,
@@ -12,6 +11,8 @@ const defaultConfig = {
 	lyricBlur: true,
 	lyricSize: 1.5,
 	lyricSpace: .5,
+	extensions: ["assets/extensions/local.json"],
+	extensionCache: {},
 }
 
 const configListeners = {};
@@ -27,7 +28,7 @@ const config = {
 			const config = JSON.parse(data);
 			if (config[key] || config[key] === false || config[key] === 0) return config[key];
 			return defaultConfig[key];
-		} catch(_ignore) {
+		} catch {
 			alert("配置文件损坏，程序将无法正常运行。");
 		}
 	},
@@ -42,7 +43,7 @@ const config = {
 			config[key] = value;
 			const newConfig = JSON.stringify(config);
 			localStorage.SimMusicConfig = newConfig;
-		} catch(_ignore) {
+		} catch {
 			alert("配置文件损坏，程序将无法正常运行。");
 		}
 		if (configListeners[key]) configListeners[key](value);

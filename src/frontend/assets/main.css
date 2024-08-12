@@ -20,7 +20,7 @@ button:disabled{filter:grayscale(1)!important;}
 a{color:#1E9FFF;text-decoration:none;}
 a:hover{text-decoration:underline;}
 a:active{opacity:.8;text-decoration:underline;}
-input{background:rgba(0,0,0,.03);padding:8px 10px;border-radius:5px;border:0;font-size:1rem;font-family:inherit;width:100%;margin:5px 0;}
+input,select{background:rgba(0,0,0,.03);padding:8px 10px;border-radius:5px;border:0;font-size:1rem;font-family:inherit;width:100%;margin:5px 0;}
 
 
 
@@ -36,7 +36,7 @@ header i#miniBtn{transform:scaleY(-1);font-size:.95em;}
 header i:hover{background:rgba(0,0,0,.05);}
 header i:active{background:rgba(0,0,0,.1);opacity:.8;}
 header i#closeBtn:hover{background:#E81123;color:white;}
-header i#closeBtn:active{background:#E81123;color:rgba(255,255,255,.8);}
+header i#closeBtn:active{background:#E81123;color:rgba(252,252,252,.8);}
 header i.active{color:#1E9FFF;}
 .playerShown #miniBtn,.playerShown #desktopBtn,.playerShown #lyricsBtn{opacity:0;pointer-events:none;}
 header #hidePlayerBtn{opacity:0;position:absolute;right:120px;pointer-events:none;}
@@ -47,10 +47,9 @@ header #hidePlayerBtn{opacity:0;position:absolute;right:120px;pointer-events:non
 /* 主窗体 - 侧栏界面 */
 .left{position:fixed;top:0;bottom:0;width:200px;padding:35px 10px 0 10px;text-align:center;}
 .left img{width:150px;}
-.left .leftBar{margin-top:15px;text-align:left;overflow-y:scroll;padding-bottom:100px;height:calc(100% - 45px);}
+.left .leftBar{margin-top:5px;text-align:left;overflow-y:scroll;padding-bottom:100px;height:calc(100% - 45px);}
 .left .leftBar section{margin-top:2px;}
-.left .leftBar .title{opacity:.5;padding:0 8px 0 10px;font-size:.9em;display:flex;align-items:center;margin-top:20px;margin-bottom:4px;}
-.left .leftBar .title:first-child{margin-top:5px;}
+.left .leftBar .title{opacity:.5;padding:0 8px 0 10px;font-size:.9em;display:flex;align-items:center;margin-top:15px;margin-bottom:4px;}
 .left .leftBar .title span{width:100%;}
 .left .leftBar .title i{transition:background .2s;padding:2px;border-radius:5px;}
 .left .leftBar .title i:hover{background:rgba(0,0,0,.1);}
@@ -63,12 +62,12 @@ header #hidePlayerBtn{opacity:0;position:absolute;right:120px;pointer-events:non
 
 
 /* 主窗体 - 右侧界面 */
-.right{position:fixed;top:0;right:0;bottom:0;width:calc(100% - 200px);border-left:1px solid rgba(0,0,0,.05);background:rgba(255,255,255,.8);}
+.right{position:fixed;top:0;right:0;bottom:0;width:calc(100% - 200px);border-left:1px solid rgba(0,0,0,.05);background:rgba(252,252,252,.8);}
 .right #rightPlaceholder{position:absolute;inset:0;bottom:80px;display:flex;align-items:center;justify-content:center;}
 .right #rightPlaceholder img{width:150px;}
 /* 歌单 */
-.right .musicListTitle{padding:30px;height:180px;width:100%;display:flex;align-items:center;position:absolute;top:0;left:0;background:rgba(255,255,255,.9);backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,0,0,.05);z-index:5;}
-.right .musicListTitle img{width:120px;height:120px;border-radius:5px;background:white;object-fit:cover;}
+.right .musicListTitle{padding:30px;height:180px;width:100%;display:flex;align-items:center;position:absolute;top:0;left:0;background:rgba(252,252,252,.9);backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,0,0,.05);z-index:5;}
+.right .musicListTitle img{width:120px;}
 .right .musicListTitle section{margin-left:30px;width:calc(100% - 150px);}
 .right .musicListTitle section b{font-size:1.3em;display:block;}
 .right .musicListTitle section .details{opacity:.8;font-size:.9em;margin:5px 0 10px 0;}
@@ -77,7 +76,7 @@ header #hidePlayerBtn{opacity:0;position:absolute;right:120px;pointer-events:non
 .right #musicListContainer .tableContainer table th{font-weight:normal;text-align:left;opacity:.5;font-size:.9em;padding:5px 0;}
 .right #musicListContainer .tableContainer table td{overflow:hidden;text-overflow:ellipsis;}
 .right #musicListContainer .tableContainer table td:first-child{padding:7px 10px 7px 30px;font-size:0;}
-.right #musicListContainer .tableContainer table td:first-child img{width:35px;height:35px;background:white;border-radius:5px;object-fit:cover;}
+.right #musicListContainer .tableContainer table td:first-child img{width:35px;height:35px;background:white;border-radius:5px;}
 .right #musicListContainer .tableContainer table td:last-child{padding:0 30px 0 0;width:100px;}
 .right #musicListContainer .tableContainer table thead tr{background:transparent!important;}
 .right #musicListContainer .tableContainer table tr{transition:background .1s;}
@@ -85,21 +84,35 @@ header #hidePlayerBtn{opacity:0;position:absolute;right:120px;pointer-events:non
 .right #musicListContainer .tableContainer table tr:active{background:rgba(0,0,0,.05);}
 .right #musicListContainer .tableContainer table tr.active{color:#1E9FFF;}
 .right #musicListContainer .tableContainer table tr.selected{background:#DAEFFF!important;}
+.right .tableContainer #musicListErrorOverlay{position:absolute;inset:180px 0 80px 0;display:flex;align-items:center;justify-content:center;flex-direction:column;}
+.right .tableContainer #musicListErrorOverlay img{width:120px;}
+.right .tableContainer #musicListErrorOverlay div{opacity:.5;margin-top:10px;font-size:1.2em;text-align:center;}
 /* 搜索 */
+.right .searchTitle{padding:30px;height:180px;border-bottom:1px solid rgba(0,0,0,.05);position:absolute;background:rgba(252,252,252,.9);backdrop-filter:blur(20px);width:100%;z-index:5;}
+.right .searchTitle .searchTitleText{font-size:1.5em;}
+.right .searchTitle .inputGroup{margin-top:50px;display:flex;white-space:nowrap;align-items:center;justify-content:center;width:100%;}
+.right .searchTitle .inputGroup select{height:37px;border-radius:5px 0 0 5px;margin-right:2px;width:fit-content;padding:0 10px;}
+.right .searchTitle .inputGroup input{height:37px;margin-right:10px;max-width:500px;width:100%;border-radius:0 5px 5px 0;padding:0 10px;}
+.right .searchTitle .inputGroup button{height:37px;font-size:1.05em;}
+/* 扩展 */
+.right #extensionPage #extensionContainer{padding-top:90px!important;}
 /* 设置 */
-.right #settingsPage .header{padding:30px 30px 10px 30px;font-size:1.5em;border-bottom:1px solid rgba(0,0,0,.05);position:absolute;background:rgba(255,255,255,.9);backdrop-filter:blur(20px);width:100%;z-index:2;}
-.right #settingsPage #settingsContainer{position:absolute;z-index:1;padding:70px 27.5px 100px 27.5px;width:100%;height:100%;overflow-y:scroll;}
+.right .page .header{padding:30px 30px 10px 30px;font-size:1.5em;border-bottom:1px solid rgba(0,0,0,.05);position:absolute;background:rgba(252,252,252,.9);backdrop-filter:blur(20px);width:100%;z-index:2;display:flex;align-items:center;}
+.right .page .header i{margin-right:5px;}
+.right .page .header button{margin-left:15px;}
+.right #settingsPage #settingsContainer, .right #extensionPage #extensionContainer{position:absolute;z-index:1;padding:70px 27.5px 100px 27.5px;width:100%;height:100%;overflow-y:scroll;}
 .right #settingsPage #settingsContainer .title{font-weight:bold;margin:15px 2.5px 5px 2.5px;}
-.right #settingsPage #settingsContainer .block{background:rgba(0,0,0,.025);width:100%;border-radius:5px;margin-bottom:5px;padding:10px 15px;display:flex;align-items:center;}
-.right #settingsPage #settingsContainer .block section{width:100%;margin-right:10px;}
-.right #settingsPage #settingsContainer .block section div{font-size:1em;}
-.right #settingsPage #settingsContainer .block section span{display:block;font-size:.9em;opacity:.8;}
-.right #settingsPage #settingsContainer .block button{white-space:nowrap;}
+.right #settingsPage #settingsContainer .block, .right #extensionPage #extensionContainer>div{background:white;width:100%;border-radius:5px;margin-bottom:5px;padding:10px 15px;display:flex;align-items:center;}
+.right #settingsPage #settingsContainer .block section, .right #extensionPage #extensionContainer>div section{width:100%;margin-right:10px;}
+.right #settingsPage #settingsContainer .block section div, .right #extensionPage #extensionContainer>div section div{font-size:1em;}
+.right #settingsPage #settingsContainer .block section span, .right #extensionPage #extensionContainer>div section span{display:block;font-size:.9em;opacity:.8;}
+.right #settingsPage #settingsContainer .block button, .right #extensionPage #extensionContainer button{white-space:nowrap;}
 .right #settingsPage #settingsContainer .block .toggle{display:inline-block;height:20px;min-width:35px;max-width:35px;padding:2px;background:rgba(0,0,0,.05);border-radius:10px;vertical-align:middle;transition:background .2s;}
 .right #settingsPage #settingsContainer .block .toggle::before{transition:margin-left .2s,transform .2s;transform:scale(.7);width:16px;height:16px;background:white;border-radius:50%;content:"";display:block;}
 .right #settingsPage #settingsContainer .block.on .toggle{background:#1E9FFF;}
 .right #settingsPage #settingsContainer .block.on .toggle::before{margin-left:15px;transform:scale(.9);}
 .right #settingsPage #settingsContainer .block .range{min-width:150px;max-width:150px;}
+.right #settingsPage #settingsContainer .block .range>div{background:rgba(0,0,0,.05);}
 .right #settingsPage #settingsContainer .block input{min-width:150px;max-width:150px;}
 /* 关于 */
 .right #aboutPage{padding:30px;overflow-y:scroll;}
@@ -114,9 +127,9 @@ header #hidePlayerBtn{opacity:0;position:absolute;right:120px;pointer-events:non
 .right #aboutPage .main>div>div>b{font-size:1.2em;display:block;}
 .right #aboutPage .main>div>div>span{font-size:.9em;opacity:.8;display:block;margin-bottom:5px;}
 .right #aboutPage .main>div a{display:block;;}
-.right #aboutPage .main>div section{background:rgba(0,0,0,.025);display:flex;align-items:center;border-radius:5px;margin:15px 0;overflow:hidden;transition:background .2s;}
-.right #aboutPage .main>div section:hover{background:rgba(0,0,0,.05);}
-.right #aboutPage .main>div section:active{background:rgba(0,0,0,.1);}
+.right #aboutPage .main>div section{background:white;display:flex;align-items:center;border-radius:5px;margin:15px 0;overflow:hidden;transition:background .2s;}
+.right #aboutPage .main>div section:hover{background:rgba(0,0,0,.025);}
+.right #aboutPage .main>div section:active{background:rgba(0,0,0,.05);}
 .right #aboutPage .main>div section>img{width:80px;height:80px;}
 .right #aboutPage .main>div section>div{margin-left:10px;}
 .right #aboutPage .main>div section>div>b{display:block;font-size:1.2em;}
@@ -125,7 +138,7 @@ header #hidePlayerBtn{opacity:0;position:absolute;right:120px;pointer-events:non
 
 
 /* 主窗体 - 播放界面 */
-.bottom{position:fixed;bottom:-90px;height:80px;width:100%;background:rgba(255,255,255,.9);backdrop-filter:blur(20px);transition:bottom .2s;}
+.bottom{position:fixed;bottom:-90px;height:80px;width:100%;background:rgba(252,252,252,.9);backdrop-filter:blur(20px);transition:bottom .2s;}
 .withCurrentMusic:not(.playerShown) .bottom{bottom:0;}
 .bottom #bottomProgressBar{width:calc(100% - 10px);position:absolute;left:5px;top:0;z-index:2;}
 .bottom #bottomProgressBar>div{border-radius:0;height:6px;}

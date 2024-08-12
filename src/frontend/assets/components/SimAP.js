@@ -62,6 +62,7 @@ const switchMusic = (playConfig) => {
 	document.querySelector(".musicInfo>b").innerText = document.querySelector(".musicInfoBottom>b").innerText = playConfig.title;
 	document.querySelector(".musicInfo>div").innerText = document.querySelector(".musicInfoBottom>div").innerText = playConfig.artist;
 	document.getElementById("audio").src = playConfig.audio;
+	document.getElementById("audio").currentTime = 0;
 	if (playConfig.play) setTimeout(() => {document.body.classList.add("playing");});
 	SimAPControls.loadLoop();
 	document.title = playConfig.title + " - SimMusic";
@@ -72,7 +73,7 @@ const switchMusic = (playConfig) => {
 		document.getElementById("animationCenter").style.background = `rgb(${themeColors[1] ? themeColors[1].join(",") : "255,255,255"})`;
 		document.getElementById("animationLeft").style.background = `rgba(${themeColors[2] ? themeColors[2].join(",") : "255,255,255"},.8)`;
 		document.getElementById("animationRight").style.background = `rgba(${themeColors[3] ? themeColors[3].join(",") : "255,255,255"},.6)`;
-		const themeColorNum = 255 / (themeColors[0][0] + themeColors[0][1] + themeColors[0][2] + 1);
+		const themeColorNum = Math.min( 255 / (themeColors[0][0] + themeColors[0][1] + themeColors[0][2] + 1), 1);
 		document.body.style.setProperty("--SimAPTheme", `rgb(${themeColors[0].map(num => num * themeColorNum).join(",")})`);
 	}
 	// 初始化音频控件
@@ -202,6 +203,7 @@ const SimAPControls = {
 const SimAPUI = {
 	show() {
 		if (this.playingAnimation) return;
+		if (!config.getItem("playList").length || !document.getElementById("album").src) return;
 		document.getElementById("playPage").hidden = false;
 		this.playingAnimation = true;
 		setTimeout(() => {

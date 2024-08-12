@@ -169,3 +169,6 @@ ipcMain.handle("pickFolder", () => {
 		properties: ["openDirectory"],
 	});
 });
+ipcMain.handle("openDevtools", () => {
+	SimMusicWindows.mainWin.webContents.openDevTools();
+});
