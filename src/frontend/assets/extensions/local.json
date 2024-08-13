@@ -3,5 +3,5 @@
 	"url": "assets/extensions/local.js",
 	"isDev": true,
 	"scheme": "file",
-	"version": "1.0.0"
+	"version": "1.0.3"
 }

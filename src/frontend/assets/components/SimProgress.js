@@ -13,6 +13,7 @@ class SimProgress {
 				const progress = Math.min(Math.max(clickX / element.clientWidth, 0), 1);
 				element.style.setProperty("--SimProgressWidth", progress * 100 + "%");
 				this.value = this.min + (this.max - this.min) * progress;
+				if (this.ondrag) this.ondrag(this.value);
 			}
 			// 鼠标事件
 			element.addEventListener("mousedown", () => {

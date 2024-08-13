@@ -36,8 +36,22 @@ const FileExtensionTools = {
 			});
 			return list;
 		} catch { return []; }
-	}
+	},
+	formatTime(ms) {
+		const totalSeconds = Math.floor(ms / 1000);
+		const minutes = Math.floor(totalSeconds / 60);
+		const seconds = totalSeconds % 60;
+		const milliseconds = ms % 1000;
+		const formattedMinutes = minutes.toString().padStart(2, '0');
+		const formattedSeconds = seconds.toString().padStart(2, '0');
+		const formattedMilliseconds = milliseconds.toString();
+	  	return `${formattedMinutes}:${formattedSeconds}.${formattedMilliseconds}`;
+	},
+	fileMenuItem: [
+		{type: ["single"], content: { label: "在资源管理器显示", click() {shell.showItemInFolder(getCurrentSelected()[0])} }}
+	]
 }
+
 
 
 /**************** 左侧导航 ****************/
@@ -54,7 +68,7 @@ ExtensionConfig.file.musicList = {
 			// 内置config读取可用getItem
 			const lists = config.getItem("folderLists");
 			// 由于数据格式由开发者自行定义，重复导入 & 其他错误需要开发者自行处理
-			if (dir.split("\\").length == 2) return alert("您不能导入磁盘根目录。");
+			if (dir.split("\\").length == 2 && !dir.split("\\")[1]) return alert("您不能导入磁盘根目录。");
 			if (lists.includes(dir)) return alert("此目录已被添加到目录列表中。");
 			lists.push(dir);
 			// 内置config写入可用setItem
@@ -82,6 +96,10 @@ ExtensionConfig.file.musicList = {
 					{ label: "查看歌曲", click() {element.click();} },
 					{ label: "在资源管理器中显示", click() {shell.openPath(name);} },
 					{ type: "separator" },
+					{ label: "添加到歌单", submenu: MusicList.getMenuItems(listName => {
+						MusicList.importToMusicList(listName, FileExtensionTools.scanMusic(name));
+						MusicList.switchList(listName, true);
+					}) },
 					{ label: "从列表中移除", click() {
 						confirm(`目录「${folderName}」将从 SimMusic 目录列表中移除，但不会从文件系统中删除。是否继续？`, () => {
 							const lists = config.getItem("folderLists");
@@ -109,7 +127,7 @@ ExtensionConfig.file.musicList = {
 		document.getElementById("musicListDir").innerText = name;
 		// 统一调用renderMusicList即可，第二个参数需要传入一个用于识别“当前歌单”的唯一的参数，推荐使用插件名+歌单id以防重复
 		// 如果你的scanMusic必须是异步的，可以先renderMusicList([], id)以切换界面，再renderMusicList(list, id)，id一样就可以
-		renderMusicList(FileExtensionTools.scanMusic(name), "folder-" + name);
+		renderMusicList(FileExtensionTools.scanMusic(name), "folder-" + name, false, false, "当前目录为空", FileExtensionTools.fileMenuItem);
 		// 这个用于把当前歌单标蓝，放在renderMusicList函数后运行，推荐借鉴我的写法在renderList函数里自己设一个dataset，然后遍历dataset
 		document.querySelectorAll(".left .leftBar div").forEach(ele => {
 			if (ele.dataset.folderName != name) ele.classList.remove("active");
@@ -126,7 +144,7 @@ ExtensionConfig.file.musicList = {
 ExtensionConfig.file.readMetadata = async (file) => {
 	file = file.replace("file:", "");
 	try {
-		const metadata = await musicMetadata.parseFile(file)
+		const metadata = await musicMetadata.parseFile(file);
 		let nativeLyrics;
 		for (const tagType in metadata.native) {
 			if (metadata.native[tagType].forEach) metadata.native[tagType].forEach(tag => {
@@ -143,7 +161,7 @@ ExtensionConfig.file.readMetadata = async (file) => {
 			album: metadata.common.album ? metadata.common.album : file.split("\\")[file.split("\\").length - 2],
 			time: metadata.format.duration,
 			cover: metadataCover ? metadataCover : "",
-			lyrics: metadata.common.lyrics || nativeLyrics,
+			lyrics: nativeLyrics ? nativeLyrics : "",
 		};
 	} catch {
 		return {};
@@ -165,7 +183,16 @@ ExtensionConfig.file.player = {
 		const lastDotIndex = file.lastIndexOf(".");
 		lrcPath = file.substring(0, lastDotIndex) + ".lrc";
 		try {return fs.readFileSync(lrcPath, "utf8");}
-		catch {return "";}
+		catch {
+			let id3Lyrics = "";
+			const id3LyricsArray = await nodeId3.Promise.read(file);
+			if (id3LyricsArray && id3LyricsArray.synchronisedLyrics && id3LyricsArray.synchronisedLyrics[0]) {
+				id3LyricsArray.synchronisedLyrics[0].synchronisedText.forEach(obj => {
+					id3Lyrics += `[${FileExtensionTools.formatTime(obj.timeStamp)}]${obj.text}\n`;
+				});
+			}
+			return id3Lyrics;
+		}
 	},
 };
 
@@ -180,8 +207,10 @@ ExtensionConfig.file.search = async keyword => {
 	fileArray.forEach(file => {
 		if (SimMusicTools.getTitleFromPath(file).includes(keyword)) resultArray.push(file);
 		else if (lastMusicIndex[file]) {
-			if (Object.values(lastMusicIndex[file]).join(" ").includes(keyword)) resultArray.push(file);
+			const songInfo = lastMusicIndex[file];
+			const songInfoString = songInfo.title + songInfo.album + songInfo.artist;
+			if (songInfoString.includes(keyword)) resultArray.push(file);
 		}
 	});
-	return resultArray;
+	return {files: resultArray, menu: FileExtensionTools.fileMenuItem};
 }

@@ -84,7 +84,7 @@ class SimLRC {
 				let div = lrcEles[index];
 				if (div.dataset.stamp <= currentTime && (!div.nextElementSibling || div.nextElementSibling.dataset.stamp > currentTime)) {
 					// 执行回调
-					if (!div.classList.contains("active") && options.callback) options.callback(div.innerText);
+					if (!div.classList.contains("active") && options.callback) options.callback(div.querySelector("span") ? div.querySelector("span").innerText : div.innerText);
 					if (!div.classList.contains("active") || forceScroll) {
 						// 取消用户滚动模式
 						if (forceScroll) {
@@ -130,6 +130,7 @@ class SimLRC {
 		setTimeout(() => {container.querySelector("div.active").scrollIntoView({block: "center", behavior: "smooth"});});
 		// 处理用户滚动
 		const handleUserScroll = () => {
+			if (document.body.classList.contains("volume")) return;
 			clearTimeout(this.scrollTimeoutId);
 			this.scrollTimeoutId = setTimeout(() => {
 				container.classList.remove("scrolling");

@@ -1,6 +1,7 @@
 
-#background{filter:blur(100px);z-index:-1;top:-200px;left:-200px;right:-200px;bottom:-200px;position:absolute;pointer-events:none;opacity:.15;transition:background .3s;}
+#background{filter:blur(100px);z-index:-1;top:-200px;left:-200px;right:-200px;bottom:-200px;position:absolute;pointer-events:none;opacity:.2;transition:background .3s;}
 #background>div{width:max(40vw,40vh);height:max(40vw,40vh);animation-duration:20s;animation-iteration-count:infinite;animation-timing-function:cubic-bezier(0.1, 0, 0.9, 1);position:absolute;border-radius:100%;opacity:.8;transition:background .3s;}
+#background>section{position:absolute;inset:0;background:linear-gradient(135deg, rgba(255,255,255,.1), rgba(255,255,255,.5));}
 .disableBackgroundBlur #background{filter:none;}
 .disableBackgroundBlur #background>div{display:none;}
 body:not(.playing) #background>div{animation-play-state:paused;}
@@ -39,8 +40,8 @@ body:not(.playing) #background>div{animation-play-state:paused;}
 .playing .controls .buttons>.play>i:last-child,.playing .bottom .center>.play>i:last-child{opacity:1;transform:none;}
 /* 音量控制 */
 .volume .controls .buttons>div{width:0;opacity:0!important;}
-.volume .controls .buttons>.volBtn{width:200px;color:rgba(0,0,0,.7);background:rgba(0,0,0,.05)!important;transform:none!important;opacity:1!important;mask:unset;border-radius:100px;}
-.volume .controls .buttons>.volBtn>i{right:140px;}
+.volume .controls .buttons>.volBtn{width:180px;color:rgba(0,0,0,.7);background:rgba(0,0,0,.05)!important;transform:none!important;opacity:1!important;mask:unset;border-radius:100px;}
+.volume .controls .buttons>.volBtn>i{right:120px;}
 .volume .controls .buttons>.volBtn>i:hover{color:var(--SimAPTheme);}
 .controls .buttons>.volBtn>div{width:calc(100% - 85px);position:absolute;margin:auto 0;top:0;bottom:0;right:30px;opacity:0;pointer-events:none;transition:opacity .3s;}
 .volume .controls .buttons>.volBtn>div{opacity:1;pointer-events:all;}
@@ -61,10 +62,14 @@ body:not(.hideLyrics) .lyricsBtn{color:var(--SimAPTheme);opacity:.7;}
 .list::before,.list::after{content:"";display:block;height:50%;}
 .hideList .list{transform:scale(.6);opacity:0;pointer-events:none;}
 body:not(.hideList) .listBtn{color:var(--SimAPTheme);opacity:.7;}
-.list>div{width:100%;padding:10px;border-radius:10px;display:flex;align-items:center;transition:background .2s;}
+.list>div{width:100%;padding:0 10px;height:80px;border-radius:10px;display:flex;align-items:center;transition:background .2s;}
 .list>div:hover{background:rgba(0,0,0,.025);}
 .list>div.active,.list>div:active{background:rgba(0,0,0,.05);}
+.list>div.removed{transition:all .3s,opacity .15s;height:0;background:rgba(0,0,0,.025);opacity:0;transform:scaleX(.9) scaleY(.5);}
 .list>div>img{min-width:60px;height:60px;border-radius:5px;margin-right:10px;background:white;}
-.list>div>div{width:calc(100% - 70px);}
+.list>div>div{width:calc(100% - 100px);}
 .list>div>div>b{display:block;width:100%;font-size:1.1em;}
 .list>div>div>span{display:block;width:100%;opacity:.8;font-size:.9em;}
+.list>div i{opacity:.3;width:30px;height:30px;display:flex;align-items:center;justify-content:center;transition:opacity .2s;}
+.list>div i:hover{opacity:.8;}
+.list>div.active i{opacity:0;pointer-events:none;}

@@ -5,6 +5,7 @@
     "main": "main.js",
     "author": "Simsv Studio",
     "dependencies": {
-        "music-metadata": "^10.0.1"
+		"music-metadata": "^7.13.5",
+		"node-id3": "^0.2.6"
     }
 }

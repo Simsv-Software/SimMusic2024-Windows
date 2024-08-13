@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html data-window-id="mainWin">
 	<head>
-		<title>SimMusic 开发预览版</title>
+		<title>SimMusic</title>
 		<meta charset="utf-8">
 		<link rel="stylesheet" href="assets/components/ContextMenu.css">
 		<link rel="stylesheet" href="assets/components/SimAP.css">
@@ -12,12 +12,10 @@
 	<body class="hideList">
 		
 
-		<!-- 主体内容 -->
-
+		<!-- 顶部按钮 -->
 		<header>
 			<i onclick="SimAPUI.hide()" id="hidePlayerBtn">&#xeab4;</i>
 			<i onclick="WindowOps.toggleMini()" id="miniBtn">&#xeb14;</i>
-			<i onclick="WindowOps.toggleDesktop()" id="desktopBtn">&#xea7a;</i>
 			<i onclick="WindowOps.toggleLyrics()" id="lyricsBtn">词</i>
 			<i onclick="WindowOps.minimize()">&#xeaba;</i>
 			<i onclick="WindowOps.maximize()" id="maximizeBtn">&#xeab9;</i>
@@ -42,6 +40,7 @@
 			</div>
 			<!-- 右侧栏 -->
 			<div class="right">
+				<section id="leftBarResizer"></section>
 				<!-- 无任务占位Logo -->
 				<div id="rightPlaceholder">
 					<img src="assets/icon-grey.svg">
@@ -66,7 +65,7 @@
 					<div class="searchTitle">
 						<form class="inputGroup" onsubmit="Search.submit()">
 							<select id="searchSource"></select>
-							<input id="searchInput" placeholder="输入搜索关键字...">
+							<input id="searchInput" placeholder="输入搜索关键字..." spellcheck="false">
 							<button id="searchSubmitBtn"><i>&#xF0D1;</i> 搜索</button>
 						</form>
 						<div id="searchSources"></div>
@@ -137,6 +136,8 @@
 				</div>
 			</div>
 			</div>
+			<!-- 拖入提示 -->
+			<div id="dropTipContainer"><div id="dropTip"><i>&#xEA11;</i> 松手加入当前歌单</div></div>
 			<!-- 播放条 -->
 			<div class="bottom">
 				<div id="bottomProgressBar"></div><div class="progressBefore"></div><div class="progressAfter"></div>
@@ -190,6 +191,7 @@
 				<div id="animationLeft"></div>
 				<div id="animationCenter"></div>
 				<div id="animationRight"></div>
+				<section></section>
 			</div>
 		</div>
 

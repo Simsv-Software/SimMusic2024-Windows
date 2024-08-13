@@ -53,10 +53,11 @@
 				window.close();
 			}
 			document.documentElement.onkeydown = e => {
-				if (e.ctrlKey && e.key != "a") e.preventDefault();
+				if ((e.ctrlKey && ["i", "I", "r", "R"].includes(e.key)) || e.key == "Tab") e.preventDefault();
+				if (document.activeElement.tagName.toLowerCase() != "input") e.preventDefault();
 				if (e.key == "Enter") submitDialog();
 				if (e.key == "Escape") cancelDialog();
-			}
+			};
 		</script>
 	</body>
 </html>

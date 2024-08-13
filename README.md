@@ -1,4 +1,5 @@
 # SimMusic 2024
-专注本地音乐播放。
+高颜值模块化音频播放器。
 
-官网 & 软件下载：https://simsv.com/products#/simmusic
+# Downloads
+https://simsv.com/products#/simmusic

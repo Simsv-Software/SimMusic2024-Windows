@@ -63,7 +63,7 @@ const switchMusic = (playConfig) => {
 	document.querySelector(".musicInfo>div").innerText = document.querySelector(".musicInfoBottom>div").innerText = playConfig.artist;
 	document.getElementById("audio").src = playConfig.audio;
 	document.getElementById("audio").currentTime = 0;
-	if (playConfig.play) setTimeout(() => {document.body.classList.add("playing");});
+	if (playConfig.play) setTimeout(() => {document.body.classList.add("playing");SimAPControls.loadAudioState();});
 	SimAPControls.loadLoop();
 	document.title = playConfig.title + " - SimMusic";
 	// 初始化背景
@@ -92,8 +92,7 @@ const switchMusic = (playConfig) => {
 		SimAPProgress.setValue(audio.currentTime); SimAPProgressBottom.setValue(audio.currentTime);
 		current.innerText = SimAPTools.formatTime(audio.currentTime);
 		document.body.classList[!audio.paused ? "add" : "remove"]("playing");
-		navigator.mediaSession.playbackState = audio.paused ? "paused" : "playing";
-		ipcRenderer.invoke(audio.paused ? "musicPause" : "musicPlay");
+		SimAPControls.loadAudioState();
 	};
 	audio.onended = () => {
 		if (config.getItem("loop") == 1) { audio.duration = 0; audio.play(); }
@@ -102,7 +101,6 @@ const switchMusic = (playConfig) => {
 	audio.onerror = () => {
 		document.body.classList.add("withCurrentMusic");
 		shell.beep();
-		setTimeout(() => {SimAPControls.next();}, 5000);
 	};
 	// 系统级控件
 	navigator.mediaSession.metadata = new MediaMetadata({ title: playConfig.title, artist: playConfig.artist, artwork: [{ src: playConfig.album }],	});
@@ -112,18 +110,27 @@ const switchMusic = (playConfig) => {
 	navigator.mediaSession.setActionHandler("nexttrack", SimAPControls.next);
 	// 初始化歌词
 	const slrc = new SimLRC(playConfig.lyrics);
-	slrc.render(document.querySelector(".lyrics>div"), audio, {align: "left", lineSpace: config.getItem("lyricSpace"), activeColor: "var(--SimAPTheme)", normalColor: "rgba(0,0,0,.4)", callback: txt => {
-		ipcRenderer.invoke("lrcUpdate", audio.currentTime, txt);
-	}});
+	slrc.render(document.querySelector(".lyrics>div"), audio, {
+		align: "left",
+		lineSpace: config.getItem("lyricSpace"),
+		activeColor: "var(--SimAPTheme)",
+		normalColor: "rgba(0,0,0,.4)",
+		multiLangSupport: config.getItem("lyricMultiLang"),
+		callback: txt => { ipcRenderer.invoke("lrcUpdate", txt); }
+	});
 	SimAPControls.loadConfig();
 };
 
 const SimAPControls = {
+	loadAudioState() {
+		const playing = document.body.classList.contains("playing");
+		navigator.mediaSession.playbackState = playing ? "playing" : "paused";
+		ipcRenderer.invoke(playing ? "musicPlay" : "musicPause");
+	},
 	togglePlay() {
 		document.body.classList[audio.paused ? "add" : "remove"]("playing");
 		audio[audio.paused ? "play" : "pause"]();
-		navigator.mediaSession.playbackState = audio.paused ? "paused" : "playing";
-		ipcRenderer.invoke(audio.paused ? "musicPause" : "musicPlay");
+		SimAPControls.loadAudioState();
 	},
 	prev() {this.switchIndex(-1);},
 	next() {this.switchIndex(1);},
@@ -195,6 +202,7 @@ const SimAPControls = {
 	loadConfig() {
 		document.querySelector(".SimLRC").style.setProperty("--lineSpace", config.getItem("lyricSpace") + "em");
 		document.querySelector(".lyrics").style.setProperty("--lrcSize", config.getItem("lyricSize") + "em");
+		document.querySelector(".lyrics").style.setProperty("--lrcTranslation", config.getItem("lyricTranslation") + "em");
 		document.body.classList[config.getItem("backgroundBlur") ? "remove" : "add"]("disableBackgroundBlur");
 		document.body.classList[config.getItem("lyricBlur") ? "remove" : "add"]("disableLyricsBlur");
 	}
@@ -203,6 +211,7 @@ const SimAPControls = {
 const SimAPUI = {
 	show() {
 		if (this.playingAnimation) return;
+		if (document.body.classList.contains("playerShown")) return;
 		if (!config.getItem("playList").length || !document.getElementById("album").src) return;
 		document.getElementById("playPage").hidden = false;
 		this.playingAnimation = true;
@@ -213,16 +222,24 @@ const SimAPUI = {
 			document.querySelector(".list div.active").scrollIntoView({block: "center"});
 			document.querySelector(".lyrics div.active").scrollIntoView({block: "center"});
 			this.playingAnimation = false;
+			this.toggleDesktopLyrics();
+			addEventListener("visibilitychange", this.toggleDesktopLyrics);
 		}, 50);
 	},
 	hide() {
 		if (this.playingAnimation) return;
+		if (!document.body.classList.contains("playerShown")) return;
 		document.body.classList.remove("playerShown");
 		this.playingAnimation = true;
 		setTimeout(() => {
+			this.toggleDesktopLyrics();
+			removeEventListener("visibilitychange", this.toggleDesktopLyrics);
 			document.getElementById("playPage").hidden = true;
 			this.playingAnimation = false;
 		}, 300);
+	},
+	toggleDesktopLyrics() {
+		if (config.getItem("desktopLyricsAutoHide") && WindowStatus.lyricsWin) ipcRenderer.invoke("toggleLyrics");
 	}
 }
 
@@ -246,6 +263,9 @@ document.documentElement.addEventListener("keydown", event => {
 		case "ArrowLeft":
 			audio.currentTime = Math.max(0, audio.currentTime - 5);
 			break;
+		case "Escape":
+			SimAPUI.hide();
+			break;
 	}
 });
 
@@ -261,9 +281,17 @@ const loadVolumeUi = () => {
 }
 loadVolumeUi();
 config.listenChange("volume", loadVolumeUi);
-SimAPVolume.onchange = SimAPVolumeBottom.onchange = value => { config.setItem("volume", value); }
+SimAPVolume.ondrag = SimAPVolumeBottom.ondrag = value => { config.setItem("volume", value); }
 document.body.onpointerdown = () => {document.body.classList.remove("volume");};
 document.querySelector(".volBtn").onpointerdown = e => {e.stopPropagation();};
+const handleWheel = e => {
+	e.preventDefault();
+	const value = config.getItem("volume");
+	config.setItem("volume", e.deltaY > 0 ? Math.max(0, config.getItem("volume") - .05) : Math.min(1, config.getItem("volume") + .05));
+};
+document.addEventListener("wheel", e => { if (document.body.classList.contains("volume")) handleWheel(e); }, {passive: false});
+document.querySelector(".volBtn").onwheel = () => { document.body.classList.add("volume"); };
+document.querySelector(".volBtnBottom").onwheel = e => { if (!document.body.classList.contains("volume")) handleWheel(e); };
 
 
 const SimAPProgress = new SimProgress(document.getElementById("progressBar"));
@@ -274,3 +302,4 @@ config.listenChange("backgroundBlur", SimAPControls.loadConfig);
 config.listenChange("lyricBlur", SimAPControls.loadConfig);
 config.listenChange("lyricSize", SimAPControls.loadConfig);
 config.listenChange("lyricSpace", SimAPControls.loadConfig);
+config.listenChange("lyricTranslation", SimAPControls.loadConfig);

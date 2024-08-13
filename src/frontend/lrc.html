@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html data-window-id="lrcWin">
+	<head>
+		<title>SimMusicDesktopLyrics</title>
+		<meta charset="utf-8">
+	</head>
+	<body>
+
+		<style>
+			@font-face{font-family:"icon";src:url("assets/icon.woff2");}
+			@font-face{font-family:"font";src:url("assets/font.ttf");}
+			i{font-family:"icon";font-style:normal;}
+			*{box-sizing:border-box;outline:none;user-select:none;}
+			#lyrics{position:fixed;width:var(--fontWidth);}
+			#move{position:absolute;inset:0 0 auto 0;width:fit-content;height:fit-content;border-radius:50%;color:white;opacity:0;text-shadow:0 0 2px black;padding:0 10px 10px 10px;z-index:114;margin:auto;transition:opacity .2s;}
+			.showBtn #move,.focused #move,.dragging #move{opacity:.7;}
+			#text{font-size:var(--fontSize);color:var(--fontColor);-webkit-text-stroke:0.01px var(--fontStroke);position:absolute;inset:20px 0 auto 0;padding:0 5px;width:100%;font-family:"font";text-align:center;border-radius:10px;font-weight:bold;width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;transition:font-size .2s,background .2s;}
+			.dragging #text{background:rgba(0,0,0,.1);}
+		</style>
+		
+		<div id="lyrics">
+			<i id="move">&#xEC62;</i>
+			<div id="text"><span id="inside"></span></div>
+		</div>
+
+		<script src="assets/components/PublicConfig.js"></script>
+		<script>
+			const {ipcRenderer} = require("electron");
+			const lyrics = document.getElementById("lyrics");
+			const move = document.getElementById("move");
+			const text = document.getElementById("text");
+			const inside = document.getElementById("inside");
+			let isMoving = false;
+			
+			// 移动窗口
+			function moveWindow(e) {
+				config.setItem("desktopLyricsTop", e.pageY);
+				config.setItem("desktopLyricsLeft", e.pageX);
+				reloadConfig();
+			}
+			
+			// 监听事件
+			document.documentElement.onkeydown = e => { e.preventDefault(); };
+			document.documentElement.onmousemove = e => {
+				if (!document.body.classList.contains("dragging")) {
+					document.body.classList.remove("focused");
+					document.body.classList.remove("showBtn");
+					ipcRenderer.invoke("unfocusDesktopLyrics");
+				} else {
+					moveWindow(e);
+				}
+			};
+			document.documentElement.onmouseup = () => {
+				document.body.classList.remove("focused");
+				document.body.classList.remove("showBtn");
+				document.body.classList.remove("dragging");
+				ipcRenderer.invoke("unfocusDesktopLyrics");
+			};
+			move.onmouseenter = e => {
+				if (!document.body.classList.contains("showBtn")) return;
+				ipcRenderer.invoke("focusDesktopLyrics");
+				document.body.classList.add("focused");
+			};
+			move.onmousedown = e => {
+				if (!document.body.classList.contains("showBtn")) return;
+				document.body.classList.add("dragging");
+				moveWindow(e);
+			};
+			inside.onmouseenter = () => {
+				document.body.classList.add("showBtn");
+			};
+			lyrics.onmousemove = e => {
+				if (!document.body.classList.contains("dragging")) {
+					e.stopPropagation();
+				} else {
+					moveWindow(e);
+				}
+			};
+
+			// 刷新配置
+			function reloadConfig() {
+				const width = config.getItem("desktopLyricsWidth");
+				document.body.style.setProperty("--fontSize", config.getItem("desktopLyricsSize") + "px");
+				document.body.style.setProperty("--fontColor", config.getItem("desktopLyricsColor"));
+				document.body.style.setProperty("--fontStroke", config.getItem("desktopLyricsStroke"));
+				document.body.style.setProperty("--fontWidth", width + "px");
+				lyrics.style.left = config.getItem("desktopLyricsLeft") - width / 2 + "px";
+				lyrics.style.top = config.getItem("desktopLyricsTop") - 10 + "px";
+			}
+			ipcRenderer.on("lrcWinReload", reloadConfig);
+			ipcRenderer.on("lrcUpdate", (_event, lrc) => { inside.innerText = lrc; });
+			ipcRenderer.on("lrcHidden", (_event, hidden) => { inside.hidden = hidden; });
+			reloadConfig();
+		</script>
+	</body>
+</html>
