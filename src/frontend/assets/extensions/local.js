@@ -8,7 +8,7 @@
 
 /**************** 基础配置 ****************/
 // ExtensionRuntime在加载时会自动添加json中的scheme字段到ExtensionConfig下，所以无需担心ExtensionConfig.xxx是否存在
-ExtensionConfig.file.uiName = "目录";
+ExtensionConfig.file.uiName = "本地";
 // 当没有config.setItem时，调用config.getItem会返回defaultConfig中的值
 defaultConfig["folderLists"] = [];
 
@@ -86,7 +86,7 @@ ExtensionConfig.file.musicList = {
 			const folderName = spilitted[spilitted.length - 1];
 			// 创建一个div即可，可以不需要有类名
 			const element = document.createElement("div");
-			element.innerText = folderName;
+			element.textContent = folderName;
 			element.dataset.folderName = name;
 			// 处理点击，一般直接switchList即可
 			element.onclick = () => {this.switchList(name);};
@@ -118,16 +118,13 @@ ExtensionConfig.file.musicList = {
 	// 这个函数用于切换歌单
 	switchList(name) {
 		const spilitted = name.split("\\");
-		// 由于搜索和歌单共用界面，需要先隐藏搜索顶栏、显示歌单顶栏，因此这两行请勿删除
-		document.querySelector(".musicListTitle").hidden = false;
-		document.querySelector(".searchTitle").hidden = true;
-		// 这仨是渲染右侧顶部界面使用，分别为标题和目录，如果你的插件没有“目录”的概念（例如在线歌单）把第二行hidden=true然后删掉第三行就可以了
-		document.getElementById("musicListName").innerText = spilitted[spilitted.length - 1];
-		document.getElementById("folderDir").hidden = false;
-		document.getElementById("musicListDir").innerText = name;
 		// 统一调用renderMusicList即可，第二个参数需要传入一个用于识别“当前歌单”的唯一的参数，推荐使用插件名+歌单id以防重复
 		// 如果你的scanMusic必须是异步的，可以先renderMusicList([], id)以切换界面，再renderMusicList(list, id)，id一样就可以
-		renderMusicList(FileExtensionTools.scanMusic(name), "folder-" + name, false, false, "当前目录为空", FileExtensionTools.fileMenuItem);
+		// rML第三个参数请固定false，第4个参数指定是否进行预先渲染，如果为true则在二次渲染之前不会显示歌单（适用于在线歌曲必须要获取metadata的情况）
+		renderMusicList(FileExtensionTools.scanMusic(name), "folder-" + name, false, false, "当前目录为空", FileExtensionTools.fileMenuItem, {
+			name: spilitted[spilitted.length - 1],
+			dirName: name,
+		});
 		// 这个用于把当前歌单标蓝，放在renderMusicList函数后运行，推荐借鉴我的写法在renderList函数里自己设一个dataset，然后遍历dataset
 		document.querySelectorAll(".left .leftBar div").forEach(ele => {
 			if (ele.dataset.folderName != name) ele.classList.remove("active");
@@ -212,5 +209,5 @@ ExtensionConfig.file.search = async keyword => {
 			if (songInfoString.includes(keyword)) resultArray.push(file);
 		}
 	});
-	return {files: resultArray, menu: FileExtensionTools.fileMenuItem};
+	return {files: resultArray, menu: FileExtensionTools.fileMenuItem, hasMore: false};
 }

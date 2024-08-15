@@ -12,7 +12,7 @@ body:not(.playing) #background>div{animation-play-state:paused;}
 @keyframes animation-left{0%{transform:translateY(25%) translateX(0%) skew(-40deg, 20deg);}50%{transform:translateY(200%) translateX(150%) skew(40deg, 0deg);}100%{transform:translateY(25%) translateX(0%) skew(-40deg, 20deg);}}
 @keyframes animation-right{0%{transform:translateY(5%) translateX(0%) skew(40deg, 20deg);}50%{transform:translateY(200%) translateX(-150%) skew(-40deg, 0deg);}100%{transform:translateY(5%) translateX(0%) skew(40deg, 20deg);}}
 
-.playerContainer{position:absolute;inset:0;margin:20px max(calc(50vw - 500px), 90px);}
+.playerContainer{position:absolute;inset:0;margin:20px max(calc(50vw - 500px), 90px);transition:transform .2s;}
 #playPage .SimProgress{--SimProgressTheme:var(--SimAPTheme)!important;}
 
 /* 音频控件 */
@@ -27,6 +27,8 @@ body:not(.playing) #background>div{animation-play-state:paused;}
 .controls .progressControl{display:flex;align-items:center;margin:10px 0;}
 .controls .progressControl span{width:55px;font-size:.85em;opacity:.8;}
 .controls .progressControl span:last-child{text-align:right;}
+.musicLoading #progressBar>div,.musicLoading #bottomProgressBar>div{animation:progressLoading 1s linear infinite;background-image:linear-gradient(-45deg,rgba(0,0,0,.1) 25%,transparent 0,transparent 50%,rgba(0,0,0,.1) 0,rgba(0,0,0,.1) 75%,transparent 0,transparent)!important;background-repeat:repeat-x;background-size:25px 20px;}
+@keyframes progressLoading{to{background-position:25px 0;}}
 /* 下方按钮 */
 .controls .buttons,.bottom .center{align-items:center;margin-top:5px;display:flex;align-items:center;justify-content:center;}
 .controls .buttons>div,.bottom .center>div,.bottom .volBtnBottom>div{width:50px;height:50px;position:relative;font-size:1.5em;transition:all .3s;opacity:.3;border-radius:100px;overflow:hidden;}
@@ -38,6 +40,9 @@ body:not(.playing) #background>div{animation-play-state:paused;}
 .controls .buttons>.play>i:last-child,.bottom .center>.play>i:last-child{opacity:0;transform:scale(.4);}
 .playing .controls .buttons>.play>i:first-child,.playing .bottom .center>.play>i:first-child{opacity:0;transform:scale(.4);}
 .playing .controls .buttons>.play>i:last-child,.playing .bottom .center>.play>i:last-child{opacity:1;transform:none;}
+.controls .buttons>.play i:first-child,.bottom .center>.play i:first-child{padding-left:3.5px;}
+.playBtnColor .controls .buttons{color:var(--SimAPTheme);}
+.playBtnColor .bottom .center>.play{color:#1E9FFF;}
 /* 音量控制 */
 .volume .controls .buttons>div{width:0;opacity:0!important;}
 .volume .controls .buttons>.volBtn{width:180px;color:rgba(0,0,0,.7);background:rgba(0,0,0,.05)!important;transform:none!important;opacity:1!important;mask:unset;border-radius:100px;}
@@ -48,6 +53,10 @@ body:not(.playing) #background>div{animation-play-state:paused;}
 .loopList .loopBtn i::after{content:"\F072";}
 .loopSingle .loopBtn i::after{content:"\F075";}
 .loopRandom .loopBtn i::after{content:"\F124";}
+/* 3D特效 */
+body:not(.hideLyrics.hideList) .playerContainer{transform:translateX(-25px);}
+.threeEffect .controls{transform:perspective(900px) rotateY(10deg);}
+.threeEffect .lyrics,.list{transform:perspective(900px) rotateY(-12.5deg);}
 
 /* 歌词区域 */
 .lyrics{position:absolute;left:410px;top:0;width:calc(100% - 410px);font-size:var(--lrcSize);height:100%;transform-origin:left center;transition:all .3s;mask:linear-gradient(180deg,hsla(0,0%,100%,0),hsla(0,0%,100%,.6) 15%,#fff 25%,#fff 75%,hsla(0,0%,100%,.6) 85%,hsla(0,0%,100%,0));}
@@ -71,5 +80,5 @@ body:not(.hideList) .listBtn{color:var(--SimAPTheme);opacity:.7;}
 .list>div>div>b{display:block;width:100%;font-size:1.1em;}
 .list>div>div>span{display:block;width:100%;opacity:.8;font-size:.9em;}
 .list>div i{opacity:.3;width:30px;height:30px;display:flex;align-items:center;justify-content:center;transition:opacity .2s;}
-.list>div i:hover{opacity:.8;}
+.list>div i:hover,.list>div i:active{opacity:.8;}
 .list>div.active i{opacity:0;pointer-events:none;}

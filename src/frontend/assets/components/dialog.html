@@ -32,14 +32,14 @@
 				case "alert":
 					document.getElementById("prompt").hidden = true;
 					document.getElementById("subBtn").hidden = true;
-					document.getElementById("text").innerText = queryParams.get("txt");
+					document.getElementById("text").textContent = queryParams.get("txt");
 					break;
 				case "prompt":
 					document.getElementById("prompt").placeholder = queryParams.get("txt");
 					break;
 				case "confirm":
 					document.getElementById("prompt").hidden = true;
-					document.getElementById("text").innerText = queryParams.get("txt");
+					document.getElementById("text").textContent = queryParams.get("txt");
 					break;
 			}
 			function submitDialog() {

@@ -54,7 +54,7 @@ class SimLRC {
 				lrcDiv.dataset.stamp = timestamp;
 				currentLrc.forEach((text, index) => {
 					const textElement = document.createElement(index ? "small" : "span");
-					textElement.innerText = text;
+					textElement.textContent = text;
 					lrcDiv.appendChild(textElement);
 				});
 				container.appendChild(lrcDiv);
@@ -63,7 +63,7 @@ class SimLRC {
 				currentLrc.forEach(text => {
 					const lrcDiv = document.createElement("div");
 					lrcDiv.dataset.stamp = timestamp;
-					lrcDiv.innerText = text;
+					lrcDiv.textContent = text;
 					container.appendChild(lrcDiv);
 				});
 			}
@@ -84,7 +84,7 @@ class SimLRC {
 				let div = lrcEles[index];
 				if (div.dataset.stamp <= currentTime && (!div.nextElementSibling || div.nextElementSibling.dataset.stamp > currentTime)) {
 					// 执行回调
-					if (!div.classList.contains("active") && options.callback) options.callback(div.querySelector("span") ? div.querySelector("span").innerText : div.innerText);
+					if (!div.classList.contains("active") && options.callback) options.callback(div.querySelector("span") ? div.querySelector("span").textContent : div.textContent);
 					if (!div.classList.contains("active") || forceScroll) {
 						// 取消用户滚动模式
 						if (forceScroll) {

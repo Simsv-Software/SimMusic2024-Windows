@@ -9,6 +9,7 @@ class SimProgress {
 			// 拖动处理
 			const handleDrag = e => {
 				e.preventDefault();
+				if (!element.classList.contains("dragging")) return;
 				const clickX = (e.pageX || e.changedTouches[0].pageX || e.touches[0].pageX) - element.getBoundingClientRect().left;
 				const progress = Math.min(Math.max(clickX / element.clientWidth, 0), 1);
 				element.style.setProperty("--SimProgressWidth", progress * 100 + "%");

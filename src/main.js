@@ -25,11 +25,11 @@ const createWindow = () => {
 		minHeight: 700,
 		frame: false,
 		resizable: true,
-		show: false,
+		backgroundColor: "#1E9FFF",
+		title: "SimMusic",
 		webPreferences: { webSecurity: false, nodeIntegration: true, contextIsolation: false }
 	});
 	SimMusicWindows.mainWin.loadURL(path.join(__dirname, "frontend/main.html"));
-	SimMusicWindows.mainWin.once("ready-to-show", () => { SimMusicWindows.mainWin.show(); });
 	SimMusicWindows.mainWin.on("close", e => {
 		e.preventDefault();
 		SimMusicWindows.mainWin.hide();
@@ -43,10 +43,12 @@ const createWindow = () => {
 		show: false,
 		transparent: true,
 		focusable: false,
+		alwaysOnTop: true,
+		backgroundThrottling: true,
 		webPreferences: { webSecurity: false, nodeIntegration: true, contextIsolation: false }
 	});
 	SimMusicWindows.lrcWin.loadURL(path.join(__dirname, "frontend/lrc.html"));
-	SimMusicWindows.lrcWin.maximize();
+	SimMusicWindows.lrcWin.setFullScreen(true);
 }
 app.whenReady().then(() => {
 	tray = new Tray(nativeImage.createFromPath(path.join(__dirname, "frontend/assets/icon-blue.png")));
@@ -64,27 +66,35 @@ app.whenReady().then(() => {
 
 // 处理窗口事件
 let lyricsShowing = false;
+let lyricsInterval;   // 就这么写了有时候还是不生效 估计是elec的bug 暂时修不好=(
 ipcMain.handle("winOps", (_event, args) => {
 	return SimMusicWindows[args[0]][args[1]]();
 });
-ipcMain.handle("toggleLyrics", () => {
+ipcMain.handle("toggleLyrics", (_event, isShow) => {
+	if (isShow || isShow === false) {lyricsShowing = !isShow;}
 	if (lyricsShowing) {
-		SimMusicWindows.lrcWin.webContents.send("lrcHidden", true);
+		SimMusicWindows.lrcWin.webContents.send("setHidden", "text", true);
 		setTimeout(() => {SimMusicWindows.lrcWin.hide();}, 100);
 		lyricsShowing = false;
+		clearInterval(lyricsInterval);
 	} else {
 		SimMusicWindows.lrcWin.show();
 		SimMusicWindows.lrcWin.setIgnoreMouseEvents("true", {forward: true});
 		SimMusicWindows.lrcWin.setSkipTaskbar(true);
+		SimMusicWindows.lrcWin.setAlwaysOnTop(false);
 		SimMusicWindows.lrcWin.setAlwaysOnTop(true);
 		lyricsShowing = true;
-		setTimeout(() => {SimMusicWindows.lrcWin.webContents.send("lrcHidden", false);}, 300);
+		setTimeout(() => {SimMusicWindows.lrcWin.webContents.send("setHidden", "text", false);}, 400);
+		lyricsInterval = setInterval(() => {if (SimMusicWindows.lrcWi) SimMusicWindows.lrcWin.setAlwaysOnTop(true);}, 100);
 	}
 	return lyricsShowing;
 });
 ipcMain.handle("restart", () => {
 	app.exit();
 	app.relaunch();
+});
+ipcMain.handle("quitApp", () => {
+	app.exit();
 });
 
 
@@ -139,11 +149,11 @@ const createTaskbarButtons = (isPlay) => {
 	tray.setContextMenu(menu);
 }
 ipcMain.handle("musicPlay", () => {
-	if (lyricsShowing) SimMusicWindows.lrcWin.webContents.send("lrcHidden", false);
+	if (lyricsShowing) SimMusicWindows.lrcWin.webContents.send("setHidden", "inside", false);
 	createTaskbarButtons(true);
 });
 ipcMain.handle("musicPause", () => {
-	SimMusicWindows.lrcWin.webContents.send("lrcHidden", true);
+	SimMusicWindows.lrcWin.webContents.send("setHidden", "inside", true);
 	createTaskbarButtons(false);
 });
 

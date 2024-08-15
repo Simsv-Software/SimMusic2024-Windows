@@ -59,11 +59,16 @@ const SimAPTools = {
 const switchMusic = (playConfig) => {
 	// 初始化界面
 	document.getElementById("album").src = document.getElementById("albumBottom").src = playConfig.album;
-	document.querySelector(".musicInfo>b").innerText = document.querySelector(".musicInfoBottom>b").innerText = playConfig.title;
-	document.querySelector(".musicInfo>div").innerText = document.querySelector(".musicInfoBottom>div").innerText = playConfig.artist;
+	document.querySelector(".musicInfo>b").textContent = document.querySelector(".musicInfoBottom>b").textContent = playConfig.title;
+	document.querySelector(".musicInfo>div").textContent = document.querySelector(".musicInfoBottom>div").textContent = playConfig.artist;
 	document.getElementById("audio").src = playConfig.audio;
 	document.getElementById("audio").currentTime = 0;
-	if (playConfig.play) setTimeout(() => {document.body.classList.add("playing");SimAPControls.loadAudioState();});
+	document.body.classList.add("withCurrentMusic");
+	document.body.classList.add("musicLoading");
+	if (playConfig.play) setTimeout(() => {
+		document.body.classList.add("playing");
+		SimAPControls.loadAudioState();
+	});
 	SimAPControls.loadLoop();
 	document.title = playConfig.title + " - SimMusic";
 	// 初始化背景
@@ -81,26 +86,34 @@ const switchMusic = (playConfig) => {
 	const current = document.getElementById("progressCurrent");
 	const duration = document.getElementById("progressDuration");
 	audio.onloadedmetadata = () => {
-		document.body.classList.add("withCurrentMusic");
+		document.body.classList.remove("musicLoading");
 		SimAPProgress.max = SimAPProgressBottom.max = audio.duration;
 		SimAPProgress.setValue(0); SimAPProgressBottom.setValue(0);
-		duration.innerText = SimAPTools.formatTime(audio.duration);
+		duration.textContent = SimAPTools.formatTime(audio.duration);
 		SimAPProgress.onchange = SimAPProgressBottom.onchange = value => { audio.currentTime = value; }
 		if (playConfig.play) audio.play(); else audio.pause();
 	};
 	audio.ontimeupdate = () => {
+		document.body.classList.remove("musicLoading");
 		SimAPProgress.setValue(audio.currentTime); SimAPProgressBottom.setValue(audio.currentTime);
-		current.innerText = SimAPTools.formatTime(audio.currentTime);
+		current.textContent = SimAPTools.formatTime(audio.currentTime);
 		document.body.classList[!audio.paused ? "add" : "remove"]("playing");
 		SimAPControls.loadAudioState();
 	};
+	audio.onwaiting = () => {
+		document.body.classList.add("musicLoading");
+	};
 	audio.onended = () => {
-		if (config.getItem("loop") == 1) { audio.duration = 0; audio.play(); }
+		if (config.getItem("loop") == 1) { PlayerController.switchMusic(config.getItem("currentMusic"), false, true); }
 		else SimAPControls.next();
 	};
 	audio.onerror = () => {
-		document.body.classList.add("withCurrentMusic");
 		shell.beep();
+		document.body.classList.remove("playing");
+		document.body.classList.remove("musicLoading");
+		confirm("当前曲目播放失败，是否从播放列表中移除？", () => {
+			PlayerController.deleteFromList(config.getItem("currentMusic"));
+		});
 	};
 	// 系统级控件
 	navigator.mediaSession.metadata = new MediaMetadata({ title: playConfig.title, artist: playConfig.artist, artwork: [{ src: playConfig.album }],	});
@@ -128,6 +141,7 @@ const SimAPControls = {
 		ipcRenderer.invoke(playing ? "musicPlay" : "musicPause");
 	},
 	togglePlay() {
+		if (document.body.classList.contains("musicLoading")) return;
 		document.body.classList[audio.paused ? "add" : "remove"]("playing");
 		audio[audio.paused ? "play" : "pause"]();
 		SimAPControls.loadAudioState();
@@ -222,7 +236,7 @@ const SimAPUI = {
 			document.querySelector(".list div.active").scrollIntoView({block: "center"});
 			document.querySelector(".lyrics div.active").scrollIntoView({block: "center"});
 			this.playingAnimation = false;
-			this.toggleDesktopLyrics();
+			this.toggleDesktopLyrics(null, false);
 			addEventListener("visibilitychange", this.toggleDesktopLyrics);
 		}, 50);
 	},
@@ -232,22 +246,26 @@ const SimAPUI = {
 		document.body.classList.remove("playerShown");
 		this.playingAnimation = true;
 		setTimeout(() => {
-			this.toggleDesktopLyrics();
+			this.toggleDesktopLyrics(null, true);
 			removeEventListener("visibilitychange", this.toggleDesktopLyrics);
 			document.getElementById("playPage").hidden = true;
 			this.playingAnimation = false;
 		}, 300);
 	},
-	toggleDesktopLyrics() {
-		if (config.getItem("desktopLyricsAutoHide") && WindowStatus.lyricsWin) ipcRenderer.invoke("toggleLyrics");
-	}
+	toggleDesktopLyrics(_event, showWindow = document.visibilityState == "hidden" ? true : false) {
+		if (config.getItem("desktopLyricsAutoHide") && WindowStatus.lyricsWin) ipcRenderer.invoke("toggleLyrics", showWindow);
+	},
 }
+ipcRenderer.invoke("musicPause");
 
-
-document.documentElement.addEventListener("keydown", event => {
+let keydownLock;
+document.documentElement.addEventListener("keydown", e => {
+	if (keydownLock) return;
+	keydownLock = true;
+	setTimeout(() => { keydownLock = false; }, 150)
 	if (document.activeElement.tagName.toLowerCase() == "input") return;
 	const audio = document.getElementById("audio");
-	switch (event.key) {
+	switch (e.key) {
 		case " ":
 			SimAPControls.togglePlay();
 			break;
@@ -265,6 +283,7 @@ document.documentElement.addEventListener("keydown", event => {
 			break;
 		case "Escape":
 			SimAPUI.hide();
+			document.body.classList.remove("volume");
 			break;
 	}
 });

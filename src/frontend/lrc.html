@@ -35,7 +35,7 @@
 			// 移动窗口
 			function moveWindow(e) {
 				config.setItem("desktopLyricsTop", e.pageY);
-				config.setItem("desktopLyricsLeft", e.pageX);
+				config.setItem("desktopLyricsLeft", Math.max(e.pageX, ));
 				reloadConfig();
 			}
 			
@@ -88,8 +88,8 @@
 				lyrics.style.top = config.getItem("desktopLyricsTop") - 10 + "px";
 			}
 			ipcRenderer.on("lrcWinReload", reloadConfig);
-			ipcRenderer.on("lrcUpdate", (_event, lrc) => { inside.innerText = lrc; });
-			ipcRenderer.on("lrcHidden", (_event, hidden) => { inside.hidden = hidden; });
+			ipcRenderer.on("lrcUpdate", (_event, lrc) => { inside.textContent = lrc; });
+			ipcRenderer.on("setHidden", (_event, id, hidden) => { document.getElementById(id).hidden = hidden; });
 			reloadConfig();
 		</script>
 	</body>

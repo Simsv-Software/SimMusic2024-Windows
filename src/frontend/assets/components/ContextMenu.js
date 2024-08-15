@@ -31,7 +31,7 @@ class ContextMenu {
             if (item.label) {
                 d = document.createElement("div");
                 d.classList.add("item");
-                d.innerText = item.label;
+                d.textContent = item.label;
                 if (item.submenu) {
                     if (item.submenu.length == 0) {
                         item.submenu = [{

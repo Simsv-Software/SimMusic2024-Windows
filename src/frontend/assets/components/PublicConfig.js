@@ -7,8 +7,8 @@ const defaultConfig = {
 	loop: 0,
 	lrcShow: true,
 	musicFormats: ".mp3 .wav .flac",
-	listDomCache: true,
 	backgroundBlur: true,
+	"3dEffect": false,
 	lyricBlur: true,
 	lyricSize: 1.5,
 	lyricTranslation: .8,
@@ -26,6 +26,7 @@ const defaultConfig = {
 	desktopLyricsLeft: screen.width / 2,
 	extensions: ["assets/extensions/local.json"],
 	extensionCache: {},
+	musicListSort: [1, 1],
 }
 
 const configListeners = {};

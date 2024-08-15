@@ -9,18 +9,24 @@
 		<link rel="stylesheet" href="assets/components/SimLRC.css">
 		<link rel="stylesheet" href="assets/main.css">
 	</head>
-	<body class="hideList">
+	<body class="hideList appLoading">
 		
 
 		<!-- 顶部按钮 -->
 		<header>
-			<i onclick="SimAPUI.hide()" id="hidePlayerBtn">&#xeab4;</i>
-			<i onclick="WindowOps.toggleMini()" id="miniBtn">&#xeb14;</i>
-			<i onclick="WindowOps.toggleLyrics()" id="lyricsBtn">词</i>
+			<i onclick="SimAPUI.hide()" id="hidePlayerBtn" title="收起播放器">&#xeab4;</i>
+			<i onclick="WindowOps.toggleMini()" id="miniBtn" title="迷你模式">&#xeb14;</i>
+			<i onclick="WindowOps.toggleLyrics()" id="lyricsBtn" title="桌面歌词">词</i>
 			<i onclick="WindowOps.minimize()">&#xeaba;</i>
 			<i onclick="WindowOps.maximize()" id="maximizeBtn">&#xeab9;</i>
 			<i onclick="WindowOps.close()" id="closeBtn">&#xeab8;</i>
 		</header>
+
+
+		<div class="loadingSplash">
+			<img src="assets/icon-blue.png">
+		</div>
+
 		
 		<!-- 主界面 -->
 		<div id="homePage">
@@ -47,38 +53,49 @@
 				</div>
 				<!-- 歌单和目录 -->
 				<div id="musicListContainer" hidden>
-					<div class="musicListTitle">
-						<img id="musicListCover" onerror="this.src='assets/placeholder.svg'">
-						<section>
-							<b id="musicListName"></b>
-							<div class="details">
-								<span id="folderDir"><i>&#xED6A;</i> <span id="musicListDir"></span><br></span>
-								<i>&#xEF83;</i> <span id="musicListNum">0</span> 首歌曲&nbsp;&nbsp;&nbsp;
-								<i>&#xF20F;</i> <span id="musicListTime">--:--</span>
-							</div>
-							<div class="buttonGroup">
-								<button onclick="PlayerController.switchMusicWithList(null,getCurrentMusicList(),true)"><i>&#xF508;</i> 全部播放</button>
-								<button class="sub square" onclick="PlayerController.appendPlayList(getCurrentMusicList())"><i>&#xF00F;</i></button>
-							</div>
-						</section>
+					<div data-music-list-id="template">
+						<div class="musicListTitle">
+							<img class="musicListCover" src="assets/placeholder.svg" onerror="this.src='assets/placeholder.svg'">
+							<section>
+								<b class="musicListName"></b>
+								<div class="details">
+									<span class="folderDir"><i>&#xED6A;</i> <span class="musicListDir"></span><br></span>
+									<i>&#xEF83;</i> <span class="musicListNum">-</span> 首歌曲&nbsp;&nbsp;&nbsp;
+									<i>&#xF20F;</i> <span class="musicListTime">--:--</span>
+								</div>
+								<div class="buttonGroup">
+									<button onclick="PlayerController.switchMusicWithList(null,getCurrentMusicList(),true)"><i>&#xF508;</i> 全部播放</button>
+									<button class="sub square" onclick="PlayerController.appendPlayList(getCurrentMusicList())" title="添加到播放列表"><i>&#xF00F;</i></button>
+								</div>
+							</section>
+						</div>
+						<div class="tableContainer">
+							<table>
+								<thead>
+									<tr><th></th><th><span>标题</span></th><th><span>艺术家</span></th><th><span>专辑</span></th><th class="disabled"><span>时长</span></th></tr>
+									<colgroup><col><col><col><col><col></colgroup>
+								</thead>
+								<tbody class="musicListContent"></tbody>
+							</table>
+						</div>
+						<div class="musicListErrorOverlay" hidden><img src="assets/icon-error.svg"><div></div></div>
 					</div>
-					<div class="searchTitle">
-						<form class="inputGroup" onsubmit="Search.submit()">
-							<select id="searchSource"></select>
-							<input id="searchInput" placeholder="输入搜索关键字..." spellcheck="false">
-							<button id="searchSubmitBtn"><i>&#xF0D1;</i> 搜索</button>
-						</form>
-						<div id="searchSources"></div>
-					</div>
-					<div class="tableContainer">
-						<table>
-							<thead>
-								<tr><th></th><th>标题</th><th>艺术家</th><th>专辑</th><th>时长</th></tr>
-								<colgroup><col style="width:80px;"><col style="width:30%;"><col><col><col style="width:80px;"></colgroup>
-							</thead>
-							<tbody id="musicListContent"></tbody>
-						</table>
-						<div id="musicListErrorOverlay"><img src="assets/icon-error.svg"><div id="musicListErrorOverlayText">还未发起搜索</div></div>
+					<div data-music-list-id="search">
+						<div class="searchTitle">
+							<form class="inputGroup" onsubmit="Search.submit()">
+								<select id="searchSource"></select>
+								<input id="searchInput" placeholder="输入搜索关键字..." spellcheck="false">
+								<button id="searchSubmitBtn"><i>&#xF0D1;</i> 搜索</button>
+							</form>
+						</div>
+						<div class="tableContainer">
+							<table>
+								<thead><colgroup><col><col><col><col><col></colgroup></thead>
+								<tbody class="musicListContent"></tbody>
+							</table>
+							<div id="searchBottomIndicator" style="opacity:0;" onclick="Search.loadMore()"></div>
+						</div>
+						<div class="musicListErrorOverlay" hidden><img src="assets/icon-error.svg"><div></div></div>
 					</div>
 				</div>
 				<!-- 扩展页 -->
