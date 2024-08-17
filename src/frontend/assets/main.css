@@ -221,7 +221,7 @@ header #hidePlayerBtn{opacity:0;position:absolute;right:120px;pointer-events:non
 
 
 /* 主窗体 - 迷你模式 */
-header{-webkit-app-region:no-drag;}
+.miniMode header{-webkit-app-region:no-drag;}
 .miniMode .bottom{z-index:300;height:60px;background:white;}
 .miniMode .bottom .progressBefore,.miniMode .bottom .progressAfter{display:none;}
 .miniMode .bottom #bottomProgressBar{bottom:0;top:unset;width:100%;left:0;}
