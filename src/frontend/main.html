@@ -15,6 +15,7 @@
 		<!-- 顶部按钮 -->
 		<header>
 			<i onclick="SimAPUI.hide()" id="hidePlayerBtn" title="收起播放器">&#xeab4;</i>
+			<i onclick="ipcRenderer.invoke('openDevtools')" id="devBtn" hidden title="开发者工具">&#xeb6d;</i>
 			<i onclick="WindowOps.toggleMini()" id="miniBtn" title="迷你模式">&#xeb14;</i>
 			<i onclick="WindowOps.toggleLyrics()" id="lyricsBtn" title="桌面歌词">词</i>
 			<i onclick="WindowOps.minimize()">&#xeaba;</i>
@@ -39,6 +40,7 @@
 					<section id="musicLists"></section>
 					<section class="title"><span>其他</span></section>
 					<div data-page-id="searchPage" onclick="Search.switchSearch()" id="searchBtn"><i>&#xF0D1;</i> 搜索</div>
+					<div data-page-id="downloadPage" onclick="switchRightPage('downloadPage')" hidden><i>&#xEC5A;</i> 下载</div>
 					<div data-page-id="extensionPage" onclick="switchRightPage('extensionPage')"><i>&#xF450;</i> 扩展</div>
 					<div data-page-id="settingsPage" onclick="switchRightPage('settingsPage');SettingsPage.init()"><i>&#xF0EE;</i> 设置</div>
 					<div data-page-id="aboutPage" onclick="switchRightPage('aboutPage');initAboutPage()"><i>&#xEE59;</i> 关于</div>
@@ -84,7 +86,7 @@
 						<div class="searchTitle">
 							<form class="inputGroup" onsubmit="Search.submit()">
 								<select id="searchSource"></select>
-								<input id="searchInput" placeholder="输入搜索关键字..." spellcheck="false">
+								<input id="searchInput" placeholder="输入搜索关键字，Tab 切源，回车搜索 ..." spellcheck="false">
 								<button id="searchSubmitBtn"><i>&#xF0D1;</i> 搜索</button>
 							</form>
 						</div>
@@ -98,11 +100,18 @@
 						<div class="musicListErrorOverlay" hidden><img src="assets/icon-error.svg"><div></div></div>
 					</div>
 				</div>
+				<!-- 下载页 -->
+				<div id="downloadPage" class="page" hidden>
+					<div class="header">
+						<i>&#xEC5A;</i> 下载管理
+					</div>
+					<div id="downloadContainer"></div>
+				</div>
 				<!-- 扩展页 -->
 				<div id="extensionPage" class="page" hidden>
 					<div class="header">
 						<i>&#xF450;</i> 扩展程序
-						<button class="sub" onclick="ExtensionRuntime.install()"><i>&#xEC5A;</i> 安装扩展</button>
+						<small><i>&#xEC5A;</i>拖入扩展包以安装</small>
 					</div>
 					<div id="extensionContainer"></div>
 				</div>
@@ -119,7 +128,7 @@
 							<b>SimMusic 2024</b>
 							<div>
 								高颜值插件化音频播放器 · 应用版本 <span id="appVersion"></span><br>
-								© 2020-2024 Simsv Software, Licenced under GPL-3.0<br>
+								© 2020-<span id="copyrightYear"></span> Simsv Software, Licenced under GPL-3.0<br>
 								<img src="assets/misc/text.png">
 							</div>
 						</div>
@@ -128,11 +137,13 @@
 						<div>
 							<div><b>巨人的肩膀</b><span>本软件使用、参考或二次开发了以下项目的实现，在此表示感谢。</span></div>
 							<a>electron/electron</a>
+							<a>Borewit/music-metadata</a>
+							<a>Zazama/node-id3</a>
 							<a>zhujin917/3sqrt7-context-menu</a>
+							<a>101arrowz/fflate</a>
 							<a>lokesh/color-thief</a>
 							<a>Remix-Design/RemixIcon</a>
 							<a>microsoft/vscode-codicons</a>
-							<a>Moriafly/SaltPlayerSource</a>
 						</div>
 						<div>
 							<div><b>相关推荐</b><span>一些其他优秀的项目。</span></div>
@@ -154,7 +165,7 @@
 			</div>
 			</div>
 			<!-- 拖入提示 -->
-			<div id="dropTipContainer"><div id="dropTip"><i>&#xEA11;</i> 松手加入当前歌单</div></div>
+			<div id="dropTipContainer"><div id="dropTip"><i>&#xEA11;</i> <span id="dropTipText"></span></div></div>
 			<!-- 播放条 -->
 			<div class="bottom">
 				<div id="bottomProgressBar"></div><div class="progressBefore"></div><div class="progressAfter"></div>
@@ -167,7 +178,8 @@
 					<div class="larger" onclick="SimAPControls.prev()"><i>&#xF140;</i></div>
 					<div class="play" onclick="SimAPControls.togglePlay()"><i>&#xF508;</i><i>&#xF507;</i></div>
 					<div class="larger" onclick="SimAPControls.next()"><i>&#xF144;</i></div>
-					<div onclick="SimAPControls.toggleList(1);PlayerController.loadMusicListActive();SimAPUI.show()"><i>&#xF011;</i></div>
+					<div onclick="SimAPControls.toggleList(1);PlayerController.loadMusicListActive();SimAPUI.show()" class="bottomListBtn"><i>&#xF011;</i></div>
+					<div onclick="WindowOps.toggleMini()" class="miniModeBtn"><i>&#xF0F4;</i></div>
 				</div>
 				<div class="volume">
 					<div class="volBtnBottom">

@@ -78,7 +78,7 @@ class SimLRC {
 		container.style.setProperty("--lineSpace", options.lineSpace + "em");
 		// 监听事件
 		const refreshLrcProgress = forceScroll => {
-			const currentTime = audio.currentTime * 1000;
+			const currentTime = Math.round(audio.currentTime * 1000);
 			let lrcEles = Array.from(container.getElementsByTagName("div"));
 			for (let index in lrcEles) {
 				let div = lrcEles[index];

@@ -7,8 +7,6 @@
 
 
 /**************** 基础配置 ****************/
-// ExtensionRuntime在加载时会自动添加json中的scheme字段到ExtensionConfig下，所以无需担心ExtensionConfig.xxx是否存在
-ExtensionConfig.file.uiName = "本地";
 // 当没有config.setItem时，调用config.getItem会返回defaultConfig中的值
 defaultConfig["folderLists"] = [];
 
@@ -209,5 +207,9 @@ ExtensionConfig.file.search = async keyword => {
 			if (songInfoString.includes(keyword)) resultArray.push(file);
 		}
 	});
-	return {files: resultArray, menu: FileExtensionTools.fileMenuItem, hasMore: false};
+	return {
+		files: resultArray,
+		menu: FileExtensionTools.fileMenuItem,//.concat(DownloadController.getMenuItems()),
+		hasMore: false
+	};
 }

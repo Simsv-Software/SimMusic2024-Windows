@@ -25,7 +25,11 @@ input,select{background:rgba(0,0,0,.03);padding:8px 10px;border-radius:5px;borde
 
 
 
-.left .leftBar div,.right .musicListTitle section b,.right .musicListTitle section .details,.bottom .info .musicInfoBottom,.controls .musicInfo,.list>div>div>*{width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.left .leftBar div,.right .musicListTitle section b,
+.right .musicListTitle section .details,
+.bottom .info .musicInfoBottom,
+.controls .musicInfo,.list>div>div>*,
+.right #downloadContainer>div>.info>.music>b{width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
 
 
 /* 主窗体 - 加载动画 */
@@ -39,12 +43,13 @@ header{position:fixed;top:0;height:35px;display:flex;justify-content:right;width
 header i{font-family:"windowsicon";height:100%;width:40px;display:flex;align-items:center;justify-content:center;transition:background .2s,opacity .2s,color .2s;-webkit-app-region:no-drag;}
 header i#lyricsBtn{font-size:.95em;padding-bottom:1px;font-family:"微软雅黑"!important;}
 header i#miniBtn{transform:scaleY(-1);font-size:.95em;}
+header i#devBtn{font-size:.95em;}
 header i:hover{background:rgba(0,0,0,.05);}
 header i:active{background:rgba(0,0,0,.1);opacity:.8;}
 header i#closeBtn:hover{background:#E81123;color:white;}
 header i#closeBtn:active{background:#E81123;color:rgba(252,252,252,.8);}
 header i.active{color:#1E9FFF;}
-.playerShown #miniBtn,.playerShown #desktopBtn,.playerShown #lyricsBtn{opacity:0;pointer-events:none;}
+.playerShown #miniBtn,.playerShown #lyricsBtn,.playerShown #devBtn{opacity:0;pointer-events:none;}
 header #hidePlayerBtn{opacity:0;position:absolute;right:120px;pointer-events:none;}
 .playerShown header #hidePlayerBtn{opacity:1;pointer-events:all;}
 
@@ -113,13 +118,33 @@ header #hidePlayerBtn{opacity:0;position:absolute;right:120px;pointer-events:non
 .right .searchTitle .inputGroup input{height:37px;margin-right:10px;max-width:500px;width:100%;border-radius:0 5px 5px 0;padding:0 10px;}
 .right .searchTitle .inputGroup button{height:37px;font-size:1.05em;}
 .right #searchBottomIndicator{text-align:center;opacity:.8;margin-top:50px;margin:30px 0 10px 0;font-size:.9em;}
+/* 下载 */
+.right #downloadContainer{padding-top:90px!important;}
+.right #downloadContainer>div{background:white;width:100%;border-radius:5px;margin-bottom:5px;padding:10px 15px;position:relative;height:65px;overflow:hidden;transition:background .2s;}
+.right #downloadContainer>div[data-status="success"]{background:#EFF6EF;}
+.right #downloadContainer>div[data-status="error"]{background:#FCEFEF;}
+.right #downloadContainer>div>.info{display:flex;align-items:center;white-space:nowrap;position:absolute;inset:0;z-index:5;padding:0 15px;}
+.right #downloadContainer>div>.info>.music{display:flex;flex-direction:column;width:calc(100% - 150px);}
+.right #downloadContainer>div>.info>.music>span{display:block;opacity:.8;font-size:.9em;margin-top:3px;}
+.right #downloadContainer>div[data-status="pending"]>.info>.music>span>i::after{content:"\F337";}
+.right #downloadContainer>div[data-status="download"]>.info>.music>span>i::after{content:"\EC5A";}
+.right #downloadContainer>div[data-status="success"]>.info>.music>span>i::after{content:"\EB7B";}
+.right #downloadContainer>div[data-status="error"]>.info>.music>span>i::after{content:"\F4C8";}
+.right #downloadContainer>div>.info>.buttons{display:flex;justify-content:flex-end;width:150px;}
+.right #downloadContainer>div>.info>.buttons>i{width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:1.1em;border-radius:50%;transition:background .2s;}
+.right #downloadContainer>div>.info>.buttons>i:hover{background:rgba(0,0,0,.05);}
+.right #downloadContainer>div>.info>.buttons>i:active{background:rgba(0,0,0,.1);}
+.right #downloadContainer>div:not([data-status="error"])>.info>.buttons>i.errorOnly{display:none;}
+.right #downloadContainer>div:not([data-status="success"])>.info>.buttons>i.successOnly{display:none;}
+.right #downloadContainer>div>.progressBar{transition:width .2s,opacity .2s;position:absolute;inset:0;right:unset;background:#DAEFFF;width:var(--progressWidth);}
+.right #downloadContainer>div:not([data-status="download"])>.progressBar{opacity:0;}
 /* 扩展 */
-.right #extensionPage #extensionContainer{padding-top:90px!important;}
+.right #extensionContainer{padding-top:90px!important;}
 /* 设置 */
 .right .page .header{padding:30px 30px 10px 30px;font-size:1.5em;border-bottom:1px solid rgba(0,0,0,.05);position:absolute;background:rgba(252,252,252,.9);backdrop-filter:blur(20px);width:100%;z-index:2;display:flex;align-items:center;}
 .right .page .header i{margin-right:5px;}
-.right .page .header button{margin-left:15px;}
-.right #settingsPage #settingsContainer, .right #extensionPage #extensionContainer{position:absolute;z-index:1;padding:70px 27.5px 100px 27.5px;width:100%;height:100%;overflow-y:scroll;}
+.right .page .header small{font-size:.6em;margin-left:15px;opacity:.8;}
+.right #settingsPage #settingsContainer, .right #extensionContainer, .right #downloadContainer{position:absolute;z-index:1;padding:70px 27.5px 100px 27.5px;width:100%;height:100%;overflow-y:scroll;}
 .right #settingsPage #settingsContainer .title{font-weight:bold;margin:20px 2.5px 5px 2.5px;}
 .right #settingsPage #settingsContainer .block, .right #extensionPage #extensionContainer>div{background:white;width:100%;border-radius:5px;margin-bottom:5px;padding:10px 15px;display:flex;align-items:center;}
 .right #settingsPage #settingsContainer .block section, .right #extensionPage #extensionContainer>div section{width:100%;margin-right:10px;}
@@ -193,3 +218,18 @@ header #hidePlayerBtn{opacity:0;position:absolute;right:120px;pointer-events:non
 /* 主窗体 - 播放内页 */
 #playPage{position:fixed;top:120vh;left:0;width:100%;height:100%;background:white;transition:top .3s;overflow:hidden;}
 .playerShown #playPage{top:0;}
+
+
+/* 主窗体 - 迷你模式 */
+header{-webkit-app-region:no-drag;}
+.miniMode .bottom{z-index:300;height:60px;background:white;}
+.miniMode .bottom .progressBefore,.miniMode .bottom .progressAfter{display:none;}
+.miniMode .bottom #bottomProgressBar{bottom:0;top:unset;width:100%;left:0;}
+.miniMode .bottom #bottomProgressBar::after{display:none;}
+.miniMode .bottom .info{right:0;zoom:.72;top:0px;width:230px;bottom:10px;-webkit-app-region:drag;}
+.miniMode .bottom .info .musicInfoBottom{font-size:1.1em;max-width:160px;}
+.miniMode .bottom .info .musicInfoBottom div{margin-top:-2px;}
+.miniMode .bottom .center{right:15px;zoom:.7;bottom:10px;width:220px;left:unset;}
+.miniMode .bottom .center .bottomListBtn{display:none;}
+body:not(.miniMode) .bottom .center .miniModeBtn{display:none;}
+.miniMode .bottom .volume{display:none;}

@@ -19,14 +19,16 @@ const defaultConfig = {
 	desktopLyricsProtection: true,
 	desktopLyricsAutoHide: true,
 	desktopLyricsColor: "#1E9FFF",
+	desktopLyricsStrokeEnabled: true,
 	desktopLyricsStroke: "#1672B8",
 	desktopLyricsSize: 30,
 	desktopLyricsWidth: 700,
 	desktopLyricsTop: screen.height - 300,
 	desktopLyricsLeft: screen.width / 2,
-	extensions: ["assets/extensions/local.json"],
-	extensionCache: {},
+	ext: {},
 	musicListSort: [1, 1],
+	parallelDownload: 3,
+	downloadFileName: "[title] - [artist]",
 }
 
 const configListeners = {};

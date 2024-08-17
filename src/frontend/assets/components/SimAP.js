@@ -146,7 +146,11 @@ const SimAPControls = {
 		audio[audio.paused ? "play" : "pause"]();
 		SimAPControls.loadAudioState();
 	},
-	prev() {this.switchIndex(-1);},
+	prev() {
+		const audio = document.getElementById("audio");
+		if (!config.getItem("fastPlayback") || audio.currentTime / audio.duration < .9) this.switchIndex(-1);
+		else audio.currentTime = 0;
+	},
 	next() {this.switchIndex(1);},
 	switchIndex(offset) {
 		const list = config.getItem("playList");
@@ -202,16 +206,14 @@ const SimAPControls = {
 		document.querySelector(".volBtnBottom i").innerHTML = icon;
 	},
 	toggleList(isShow = document.body.classList.contains("hideList")) {
-		document.body.classList[isShow ? "add" : "remove"]("hideList");
 		document.body.classList[isShow ? "remove" : "add"]("hideList");
 		if (isShow) document.body.classList.add("hideLyrics");
 		PlayerController.loadMusicListActive();
 	},
-	toggleLyrics() {
-		document.body.classList[document.body.classList.contains("hideLyrics") ? "add" : "remove"]("hideLyrics");
-		document.body.classList[document.body.classList.contains("hideLyrics") ? "remove" : "add"]("hideLyrics");
-		if (!document.body.classList.contains("hideLyrics")) document.body.classList.add("hideList");
-		config.setItem("lrcShow", !document.body.classList.contains("hideLyrics"));
+	toggleLyrics(isShow = document.body.classList.contains("hideLyrics")) {
+		document.body.classList[isShow ? "remove" : "add"]("hideLyrics");
+		if (isShow) document.body.classList.add("hideList");
+		config.setItem("lrcShow", isShow);
 	},
 	loadConfig() {
 		document.querySelector(".SimLRC").style.setProperty("--lineSpace", config.getItem("lyricSpace") + "em");

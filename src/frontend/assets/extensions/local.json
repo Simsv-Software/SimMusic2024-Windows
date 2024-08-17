@@ -1,7 +1,0 @@
-{
-	"name": "本地歌曲",
-	"url": "assets/extensions/local.js",
-	"isDev": true,
-	"scheme": "file",
-	"version": "1.0.4"
-}

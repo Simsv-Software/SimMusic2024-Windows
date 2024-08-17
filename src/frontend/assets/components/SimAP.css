@@ -27,7 +27,7 @@ body:not(.playing) #background>div{animation-play-state:paused;}
 .controls .progressControl{display:flex;align-items:center;margin:10px 0;}
 .controls .progressControl span{width:55px;font-size:.85em;opacity:.8;}
 .controls .progressControl span:last-child{text-align:right;}
-.musicLoading #progressBar>div,.musicLoading #bottomProgressBar>div{animation:progressLoading 1s linear infinite;background-image:linear-gradient(-45deg,rgba(0,0,0,.1) 25%,transparent 0,transparent 50%,rgba(0,0,0,.1) 0,rgba(0,0,0,.1) 75%,transparent 0,transparent)!important;background-repeat:repeat-x;background-size:25px 20px;}
+.musicLoading #progressBar>div,.musicLoading #bottomProgressBar>div{animation:progressLoading 1s linear infinite;background-image:linear-gradient(-45deg,rgba(0,0,0,.05) 25%,transparent 0,transparent 50%,rgba(0,0,0,.05) 0,rgba(0,0,0,.05) 75%,transparent 0,transparent)!important;background-repeat:repeat-x;background-size:25px 20px;}
 @keyframes progressLoading{to{background-position:25px 0;}}
 /* 下方按钮 */
 .controls .buttons,.bottom .center{align-items:center;margin-top:5px;display:flex;align-items:center;justify-content:center;}
@@ -56,7 +56,7 @@ body:not(.playing) #background>div{animation-play-state:paused;}
 /* 3D特效 */
 body:not(.hideLyrics.hideList) .playerContainer{transform:translateX(-25px);}
 .threeEffect .controls{transform:perspective(900px) rotateY(10deg);}
-.threeEffect .lyrics,.list{transform:perspective(900px) rotateY(-12.5deg);}
+.threeEffect .lyrics,.threeEffect .list{transform:perspective(900px) rotateY(-12.5deg);}
 
 /* 歌词区域 */
 .lyrics{position:absolute;left:410px;top:0;width:calc(100% - 410px);font-size:var(--lrcSize);height:100%;transform-origin:left center;transition:all .3s;mask:linear-gradient(180deg,hsla(0,0%,100%,0),hsla(0,0%,100%,.6) 15%,#fff 25%,#fff 75%,hsla(0,0%,100%,.6) 85%,hsla(0,0%,100%,0));}
