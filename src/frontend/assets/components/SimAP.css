@@ -1,17 +1,4 @@
 
-#background{filter:blur(100px);z-index:-1;top:-200px;left:-200px;right:-200px;bottom:-200px;position:absolute;pointer-events:none;opacity:.2;transition:background .3s;}
-#background>div{width:max(40vw,40vh);height:max(40vw,40vh);animation-duration:20s;animation-iteration-count:infinite;animation-timing-function:cubic-bezier(0.1, 0, 0.9, 1);position:absolute;border-radius:100%;opacity:.8;transition:background .3s;}
-#background>section{position:absolute;inset:0;background:linear-gradient(135deg, rgba(255,255,255,.1), rgba(255,255,255,.5));}
-.disableBackgroundBlur #background{filter:none;}
-.disableBackgroundBlur #background>div{display:none;}
-body:not(.playing) #background>div{animation-play-state:paused;}
-#animationLeft{z-index:-1;left:0%;top:0%;animation-name:animation-left;animation-direction:reverse;}
-#animationCenter{z-index:-2;left:50%;top:10%;animation-name:animation-center;}
-#animationRight{z-index:-3;right:0%;top:20%;animation-name:animation-right;}
-@keyframes animation-center{0%{transform:translateY(-30%) translateX(-50%);}50%{transform:translateY(30%) translateX(-50%);}100%{transform:translateY(-30%) translateX(-50%);}}
-@keyframes animation-left{0%{transform:translateY(25%) translateX(0%) skew(-40deg, 20deg);}50%{transform:translateY(200%) translateX(150%) skew(40deg, 0deg);}100%{transform:translateY(25%) translateX(0%) skew(-40deg, 20deg);}}
-@keyframes animation-right{0%{transform:translateY(5%) translateX(0%) skew(40deg, 20deg);}50%{transform:translateY(200%) translateX(-150%) skew(-40deg, 0deg);}100%{transform:translateY(5%) translateX(0%) skew(40deg, 20deg);}}
-
 .playerContainer{position:absolute;inset:0;margin:20px max(calc(50vw - 500px), 90px);transition:transform .2s;}
 #playPage .SimProgress{--SimProgressTheme:var(--SimAPTheme)!important;}
 
@@ -21,8 +8,8 @@ body:not(.playing) #background>div{animation-play-state:paused;}
 .controls #album{width:calc(100% + 10px);aspect-ratio:1;object-fit:cover;border-radius:10px;box-shadow:0 20px 25px -5px rgba(0,0,0,.1),0 8px 10px -6px rgba(0,0,0,.1);background:white;margin:-5px;}
 /* 专辑信息 */
 .controls .musicInfo{margin:30px 0 10px 0;}
-.controls .musicInfo b,.controls .musicInfo div,.musicInfoBottom b,.musicInfoBottom div{display:block;font-size:1.3em;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
-.controls .musicInfo div,.musicInfoBottom div{font-size:.9em;opacity:.8;}
+.controls .musicInfo b,.controls .musicInfo div,.musicInfoBottom b,.musicInfoBottom>div{display:block;font-size:1.3em;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.controls .musicInfo div,.musicInfoBottom>div{font-size:.9em;opacity:.8;}
 /* 进度条 */
 .controls .progressControl{display:flex;align-items:center;margin:10px 0;}
 .controls .progressControl span{width:55px;font-size:.85em;opacity:.8;}
@@ -82,3 +69,11 @@ body:not(.hideList) .listBtn{color:var(--SimAPTheme);opacity:.7;}
 .list>div i{opacity:.3;width:30px;height:30px;display:flex;align-items:center;justify-content:center;transition:opacity .2s;}
 .list>div i:hover,.list>div i:active{opacity:.8;}
 .list>div.active i{opacity:0;pointer-events:none;}
+
+
+
+/* 流光背景 */
+#background{z-index:-1;inset:0;position:absolute;pointer-events:none;opacity:.2;transition:background .3s;}
+#background>div{position:absolute;inset:0;background:linear-gradient(135deg, rgba(255,255,255,.1), rgba(255,255,255,.5));}
+.disableBackgroundBlur #background>canvas{display:none;}
+

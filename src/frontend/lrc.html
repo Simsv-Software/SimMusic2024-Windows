@@ -11,12 +11,16 @@
 			@font-face{font-family:"font";src:url("assets/font.ttf");}
 			i{font-family:"icon";font-style:normal;}
 			*{box-sizing:border-box;outline:none;user-select:none;}
+			*[hidden]{display:none!important;}
 			#lyrics{position:fixed;width:var(--fontWidth);}
 			#move{position:absolute;inset:0 0 auto 0;width:fit-content;height:fit-content;border-radius:50%;color:white;opacity:0;text-shadow:0 0 2px black;padding:0 10px 10px 10px;z-index:114;margin:auto;transition:opacity .2s;}
 			.showBtn #move,.focused #move,.dragging #move{opacity:.7;}
-			#text{font-size:var(--fontSize);color:var(--fontColor);position:absolute;inset:20px 0 auto 0;padding:0 5px;width:100%;font-family:"font";text-align:center;border-radius:10px;font-weight:bold;width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;transition:font-size .2s,background .2s;}
+			#text{font-size:var(--fontSize);color:var(--fontColor);position:absolute;inset:20px 0 auto 0;padding:0 5px;width:100%;font-family:"font";text-align:center;border-radius:10px;font-weight:bold;transition:font-size .2s,background .2s;}
 			.showStroke #text{-webkit-text-stroke:0.01px var(--fontStroke);}
 			.dragging #text{background:rgba(0,0,0,.1);}
+			#text *{width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;display:block;}
+			#text small{font-size:var(--translationSize);}
+			body:not(.showTranslation) #text small{display:none;}
 		</style>
 		
 		<div id="lyrics">
@@ -83,15 +87,17 @@
 				const width = config.getItem("desktopLyricsWidth");
 				document.body.style.setProperty("--fontSize", config.getItem("desktopLyricsSize") + "px");
 				document.body.style.setProperty("--fontColor", config.getItem("desktopLyricsColor"));
-				document.body.classList[config.getItem("desktopLyricsStrokeEnabled") ? "add" : "remove"]("showStroke");
 				document.body.style.setProperty("--fontStroke", config.getItem("desktopLyricsStroke"));
+				document.body.style.setProperty("--translationSize", config.getItem("lyricTranslation") + "em");
 				document.body.style.setProperty("--fontWidth", width + "px");
+				document.body.classList[config.getItem("desktopLyricsStrokeEnabled") ? "add" : "remove"]("showStroke");
+				document.body.classList[config.getItem("desktopLyricsTranslation") ? "add" : "remove"]("showTranslation");
 				if (!config.getItem("desktopLyricsCentered")) lyrics.style.left = config.getItem("desktopLyricsLeft") - width / 2 + "px";
 				else lyrics.style.left = screen.width / 2 - width / 2 + "px";
 				lyrics.style.top = config.getItem("desktopLyricsTop") - 10 + "px";
 			}
 			ipcRenderer.on("lrcWinReload", reloadConfig);
-			ipcRenderer.on("lrcUpdate", (_event, lrc) => { inside.textContent = lrc; });
+			ipcRenderer.on("lrcUpdate", (_event, lrc) => { inside.innerHTML = lrc; });
 			ipcRenderer.on("setHidden", (_event, id, hidden) => { document.getElementById(id).hidden = hidden; });
 			reloadConfig();
 		</script>

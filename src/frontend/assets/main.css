@@ -28,7 +28,9 @@ input,select{background:rgba(0,0,0,.03);padding:8px 10px;border-radius:5px;borde
 .left .leftBar div,.right .musicListTitle section b,
 .right .musicListTitle section .details,
 .bottom .info .musicInfoBottom,
-.controls .musicInfo,.list>div>div>*,
+.bottom .info .musicInfoBottom>div>*,
+.controls .musicInfo,
+.list>div>div>*,
 .right #downloadContainer>div>.info>.music>b{width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
 
 
@@ -98,6 +100,7 @@ header #hidePlayerBtn{opacity:0;position:absolute;right:120px;pointer-events:non
 .right #musicListContainer .tableContainer table th.positiveOrder span::after{opacity:.8;margin-top:1px;}
 .right #musicListContainer .tableContainer table th.reversedOrder span::after{opacity:.8;transform:rotate(180deg);margin-bottom:1px;}
 .right #musicListContainer .tableContainer table td{overflow:hidden;text-overflow:ellipsis;}
+body:not(.disableHighlight) .right #musicListContainer .tableContainer table td>m{background:#DAEFFF;}
 .right #musicListContainer .tableContainer table td:first-child{padding:7px 10px 7px 30px;font-size:0;}
 .right #musicListContainer .tableContainer table td:first-child img{width:35px;height:35px;background:white;border-radius:5px;}
 .right #musicListContainer .tableContainer table td:last-child{padding:0 30px 0 0;width:100px;}
@@ -147,6 +150,8 @@ header #hidePlayerBtn{opacity:0;position:absolute;right:120px;pointer-events:non
 .right #settingsPage #settingsContainer, .right #extensionContainer, .right #downloadContainer{position:absolute;z-index:1;padding:70px 27.5px 100px 27.5px;width:100%;height:100%;overflow-y:scroll;}
 .right #settingsPage #settingsContainer .title{font-weight:bold;margin:20px 2.5px 5px 2.5px;}
 .right #settingsPage #settingsContainer .block, .right #extensionPage #extensionContainer>div{background:white;width:100%;border-radius:5px;margin-bottom:5px;padding:10px 15px;display:flex;align-items:center;}
+.right #settingsPage #settingsContainer .block{transform-origin:bottom;transition:margin-top .2s,opacity .2s,transform .2s;}
+.right #settingsPage #settingsContainer .block.folded{margin-top:calc(-5px - var(--height));opacity:0;pointer-events:none;transform:scaleY(0);}
 .right #settingsPage #settingsContainer .block section, .right #extensionPage #extensionContainer>div section{width:100%;margin-right:10px;}
 .right #settingsPage #settingsContainer .block section div, .right #extensionPage #extensionContainer>div section div{font-size:1em;}
 .right #settingsPage #settingsContainer .block section span, .right #extensionPage #extensionContainer>div section span{display:block;font-size:.9em;opacity:.8;word-break:break-all;line-height:1.1em;margin-top:3px;}
@@ -157,7 +162,7 @@ header #hidePlayerBtn{opacity:0;position:absolute;right:120px;pointer-events:non
 .right #settingsPage #settingsContainer .block.on .toggle::before{margin-left:15px;transform:scale(.9);}
 .right #settingsPage #settingsContainer .block .range{min-width:150px;max-width:150px;}
 .right #settingsPage #settingsContainer .block .range>div{background:rgba(0,0,0,.05);}
-.right #settingsPage #settingsContainer .block input{min-width:150px;max-width:150px;}
+.right #settingsPage #settingsContainer .block input,.right #settingsPage #settingsContainer .block select{min-width:150px;max-width:150px;}
 .right #settingsPage #settingsContainer .block .colorInput{background:rgba(0,0,0,.03);position:relative;border-radius:5px;}
 .right #settingsPage #settingsContainer .block .colorInput>input{opacity:0;}
 .right #settingsPage #settingsContainer .block .colorInput>span{position:absolute;inset:0;height:fit-content;margin:auto;text-align:center;text-transform:uppercase;}
@@ -195,7 +200,7 @@ header #hidePlayerBtn{opacity:0;position:absolute;right:120px;pointer-events:non
 /* 主窗体 - 底部控件 */
 .bottom{position:fixed;bottom:-90px;height:80px;width:100%;background:rgba(252,252,252,.9);backdrop-filter:blur(20px);transition:bottom .2s;}
 .withCurrentMusic:not(.playerShown) .bottom{bottom:0;}
-.bottom #bottomProgressBar{width:calc(100% - 10px);position:absolute;left:5px;top:0;z-index:2;}
+.bottom #bottomProgressBar{width:calc(100% - 10px);height:5px;position:absolute;left:5px;top:0;z-index:2;}
 .bottom #bottomProgressBar>div{border-radius:0;height:6px;}
 .bottom .progressBefore,.bottom .progressAfter{position:absolute;content:"";width:5px;height:6px;background:#1E9FFF;left:0;z-index:1;}
 .bottom .progressAfter{background:rgba(0,0,0,.1);left:unset;right:0;}
@@ -205,8 +210,13 @@ header #hidePlayerBtn{opacity:0;position:absolute;right:120px;pointer-events:non
 .bottom .info .img::after{content:"\EA78";font-size:2.5em;background:rgba(0,0,0,.2);position:absolute;inset:0;font-family:"icon";display:flex;align-items:center;justify-content:center;color:white;opacity:0;transition:opacity .2s;}
 .bottom .info .img:hover::after,.bottom .info .img:active::after{opacity:1;}
 .bottom .info .img>img{width:100%;height:100%;object-fit:cover;}
-.bottom .info .musicInfoBottom{max-width:200px;}
+.bottom .info .musicInfoBottom{max-width:200px;margin-bottom:5px;}
 .bottom .info .musicInfoBottom b{font-size:1.1em;}
+.bottom .info .musicInfoBottom>div{position:relative;}
+.bottom .info .musicInfoBottom>div div{transition:opacity .2s,transform .2s;}
+.bottom .info .musicInfoBottom>div #miniModeStatus{position:absolute;top:0;left:0;width:100%;}
+.miniModeStatus .bottom .info .musicInfoBottom>div #bottomArtist{transform:translateY(-3px);opacity:0;}
+body:not(.miniModeStatus) .bottom .info .musicInfoBottom>div #miniModeStatus{transform:translateY(3px);opacity:0;}
 .bottom .center{position:absolute;top:0;bottom:0;left:300px;right:300px;}
 .bottom .center>div,.bottom .volBtnBottom>div{width:40px;height:40px;}
 .bottom .center>div.play{width:55px;height:55px;}
@@ -221,15 +231,20 @@ header #hidePlayerBtn{opacity:0;position:absolute;right:120px;pointer-events:non
 
 
 /* 主窗体 - 迷你模式 */
+.miniMode{background:transparent;}
 .miniMode header{-webkit-app-region:no-drag;}
+.miniMode .left,.miniMode .right{display:none;}
 .miniMode .bottom{z-index:300;height:60px;background:white;}
 .miniMode .bottom .progressBefore,.miniMode .bottom .progressAfter{display:none;}
-.miniMode .bottom #bottomProgressBar{bottom:0;top:unset;width:100%;left:0;}
+.miniMode .bottom #bottomProgressBar{bottom:0;left:60px;top:unset;width:calc(100% - 60px);z-index:5;opacity:.8;;transition:opacity .2s,height .2s;}
+.miniMode .bottom:hover #bottomProgressBar{height:7px;}
+.miniMode .bottom #bottomProgressBar:hover,.miniMode .bottom #bottomProgressBar:active{height:7px;opacity:1;}
 .miniMode .bottom #bottomProgressBar::after{display:none;}
-.miniMode .bottom .info{right:0;zoom:.72;top:0px;width:230px;bottom:10px;-webkit-app-region:drag;}
-.miniMode .bottom .info .musicInfoBottom{font-size:1.1em;max-width:160px;}
-.miniMode .bottom .info .musicInfoBottom div{margin-top:-2px;}
-.miniMode .bottom .center{right:15px;zoom:.7;bottom:10px;width:220px;left:unset;}
+.miniMode .bottom .info{top:0;bottom:0!important;left:0;width:170px;bottom:10px;}
+.miniMode .bottom .info .img{width:60px;height:60px;border-radius:0;margin-right:10px;-webkit-app-region:drag;}
+.miniMode .bottom .info .musicInfoBottom{font-size:1.1em;max-width:calc(100px / .75);zoom:.75;}
+.miniMode .bottom .info .musicInfoBottom>div{margin-top:-1px;}
+.miniMode .bottom .center{right:15px;zoom:.7;bottom:7.5px;width:220px;left:unset;}
 .miniMode .bottom .center .bottomListBtn{display:none;}
 body:not(.miniMode) .bottom .center .miniModeBtn{display:none;}
 .miniMode .bottom .volume{display:none;}

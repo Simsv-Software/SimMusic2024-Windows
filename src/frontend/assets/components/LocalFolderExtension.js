@@ -80,8 +80,8 @@ ExtensionConfig.file.musicList = {
 	renderList(container) {
 		const lists = config.getItem("folderLists");
 		lists.forEach(name => {
-			const spilitted = name.split("\\");
-			const folderName = spilitted[spilitted.length - 1];
+			const splitted = name.split("\\");
+			const folderName = splitted[splitted.length - 1];
 			// 创建一个div即可，可以不需要有类名
 			const element = document.createElement("div");
 			element.textContent = folderName;
@@ -115,13 +115,18 @@ ExtensionConfig.file.musicList = {
 	},
 	// 这个函数用于切换歌单
 	switchList(name) {
-		const spilitted = name.split("\\");
+		const splitted = name.split("\\");
 		// 统一调用renderMusicList即可，第二个参数需要传入一个用于识别“当前歌单”的唯一的参数，推荐使用插件名+歌单id以防重复
 		// 如果你的scanMusic必须是异步的，可以先renderMusicList([], id)以切换界面，再renderMusicList(list, id)，id一样就可以
 		// rML第三个参数请固定false，第4个参数指定是否进行预先渲染，如果为true则在二次渲染之前不会显示歌单（适用于在线歌曲必须要获取metadata的情况）
-		renderMusicList(FileExtensionTools.scanMusic(name), "folder-" + name, false, false, "当前目录为空", FileExtensionTools.fileMenuItem, {
-			name: spilitted[spilitted.length - 1],
-			dirName: name,
+		renderMusicList(FileExtensionTools.scanMusic(name), {
+			uniqueId: "folder-" + name,
+			errorText: "当前目录为空", 
+			menuItems: FileExtensionTools.fileMenuItem, 
+			musicListInfo: {
+				name: splitted[splitted.length - 1],
+				dirName: name,
+			}
 		});
 		// 这个用于把当前歌单标蓝，放在renderMusicList函数后运行，推荐借鉴我的写法在renderList函数里自己设一个dataset，然后遍历dataset
 		document.querySelectorAll(".left .leftBar div").forEach(ele => {
@@ -143,7 +148,10 @@ ExtensionConfig.file.readMetadata = async (file) => {
 		let nativeLyrics;
 		for (const tagType in metadata.native) {
 			if (metadata.native[tagType].forEach) metadata.native[tagType].forEach(tag => {
-				if (tag.value && tag.value.text && tag.value.text.match && tag.value.text.match(/\[\d+\:\d+\.\d+\]/g)) {
+				if (tag.value && tag.value.match && tag.value.match(/\[\d+\:\d+\.\d+\]/g)) {
+					nativeLyrics = tag.value;
+				}
+				else if (tag.value && tag.value.text && tag.value.text.match && tag.value.text.match(/\[\d+\:\d+\.\d+\]/g)) {
 					nativeLyrics = tag.value.text;
 				}
 			});
@@ -193,19 +201,25 @@ ExtensionConfig.file.player = {
 
 
 /**************** 歌曲搜索 ****************/
-ExtensionConfig.file.search = async keyword => {
-	let fileArray = [];
-	let resultArray = [];
+ExtensionConfig.file.search = async (keyword, _page) => {
+	let allFiles = {};
 	config.getItem("folderLists").forEach(folder => {
-		fileArray = fileArray.concat(FileExtensionTools.scanMusic(folder));
+		FileExtensionTools.scanMusic(folder).forEach(file => {
+			const musicInfo = lastMusicIndex[file];
+			const musicInfoString = (SimMusicTools.getTitleFromPath(file) + (musicInfo ? (musicInfo.title + musicInfo.album + musicInfo.artist) : "")).toLowerCase();
+			allFiles[file] = musicInfoString;
+		});
 	});
-	fileArray.forEach(file => {
-		if (SimMusicTools.getTitleFromPath(file).includes(keyword)) resultArray.push(file);
-		else if (lastMusicIndex[file]) {
-			const songInfo = lastMusicIndex[file];
-			const songInfoString = songInfo.title + songInfo.album + songInfo.artist;
-			if (songInfoString.includes(keyword)) resultArray.push(file);
-		}
+	const fileArray = Object.keys(allFiles);
+	// 切割搜索词
+	const splitted = SimMusicTools.naturalSplit(keyword, true);
+	// 先把啥都匹配不到的丢垃圾桶里
+	const filteredFiles = fileArray.filter(file => splitted.some(splitItem => allFiles[file].includes(splitItem)));
+	// 然后按照匹配到的数量进行排序
+	const resultArray = filteredFiles.sort((a, b) => {
+		const countA = splitted.filter(keyword => allFiles[a].includes(keyword)).length;
+		const countB = splitted.filter(keyword => allFiles[b].includes(keyword)).length;
+		return countB - countA;
 	});
 	return {
 		files: resultArray,

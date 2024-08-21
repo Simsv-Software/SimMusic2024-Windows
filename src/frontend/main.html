@@ -135,10 +135,11 @@
 					</div>
 					<div class="main">
 						<div>
-							<div><b>巨人的肩膀</b><span>本软件使用、参考或二次开发了以下项目的实现，在此表示感谢。</span></div>
+							<div><b>巨人的肩膀</b><span>本软件使用或二开了以下项目的实现，在此表示感谢。</span></div>
 							<a>electron/electron</a>
 							<a>Borewit/music-metadata</a>
 							<a>Zazama/node-id3</a>
+							<a>the1812/flac-tagger</a>
 							<a>zhujin917/3sqrt7-context-menu</a>
 							<a>101arrowz/fflate</a>
 							<a>lokesh/color-thief</a>
@@ -149,7 +150,7 @@
 							<div><b>相关推荐</b><span>一些其他优秀的项目。</span></div>
 							<section data-href="https://www.cnblogs.com/vinlxc/p/11347744.html">
 								<img src="assets/misc/recommend-musictag.png">
-								<div><b>音乐标签</b><span>支持批量匹配本地歌曲的元数据，可与 SimMusic 配合使用。</span></div>
+								<div><b>音乐标签</b><span>批量匹配歌曲元数据，可与本软件配合使用。</span></div>
 							</section>
 							<section data-href="https://vnisoft.top">
 								<img src="assets/misc/recommend-vnimusic.png">
@@ -157,7 +158,7 @@
 							</section>
 							<section data-href="https://moriafly.com/salt-player/">
 								<img src="assets/misc/recommend-salt.png">
-								<div><b>Salt Player</b><span>数十万用户选择的 Android 端本地音乐播放器。</span></div>
+								<div><b>Salt Player</b><span>界面优雅的 Android 端本地音乐播放器。</span></div>
 							</section>
 						</div>
 					</div>
@@ -171,7 +172,7 @@
 				<div id="bottomProgressBar"></div><div class="progressBefore"></div><div class="progressAfter"></div>
 				<div class="info">
 					<div class="img" onclick="SimAPUI.show();SimAPControls.toggleList(0)"><img id="albumBottom"></div>
-					<div class="musicInfoBottom"><b>未在播放</b><div>未知艺术家</div></div>
+					<div class="musicInfoBottom"><b>未在播放</b><div><div id="bottomArtist">未知艺术家</div><div id="miniModeStatus"></div></div></div>
 				</div>
 				<div class="center">
 					<div class="loopBtn" onclick="SimAPControls.toggleLoop()"><i></i></div>
@@ -217,10 +218,8 @@
 			</div>
 
 			<div id="background">
-				<div id="animationLeft"></div>
-				<div id="animationCenter"></div>
-				<div id="animationRight"></div>
-				<section></section>
+				<canvas id="backgroundAnimation"></canvas>
+				<div></div>
 			</div>
 		</div>
 

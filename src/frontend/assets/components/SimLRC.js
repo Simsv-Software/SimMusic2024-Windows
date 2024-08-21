@@ -84,7 +84,7 @@ class SimLRC {
 				let div = lrcEles[index];
 				if (div.dataset.stamp <= currentTime && (!div.nextElementSibling || div.nextElementSibling.dataset.stamp > currentTime)) {
 					// 执行回调
-					if (!div.classList.contains("active") && options.callback) options.callback(div.querySelector("span") ? div.querySelector("span").textContent : div.textContent);
+					if (!div.classList.contains("active") && options.callback) options.callback(div.innerHTML);
 					if (!div.classList.contains("active") || forceScroll) {
 						// 取消用户滚动模式
 						if (forceScroll) {

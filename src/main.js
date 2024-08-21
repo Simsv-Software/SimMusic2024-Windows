@@ -2,14 +2,18 @@
 // © 2020 - 2024  Simsv Studio
 
 const {app, BrowserWindow, ipcMain, dialog, nativeImage, Tray, Menu, screen} = require("electron");
-const {exec} = require("child_process");
+const {execSync, exec} = require("child_process");
 const path = require("path");
+const fs = require("fs");
+const os = require("os");
 
 app.commandLine.appendSwitch("enable-smooth-scrolling");
 app.commandLine.appendSwitch("enable-features", "WindowsScrollingPersonality");
 
 // 创建窗口
 const SimMusicWindows = {};
+let isMainWinLoaded;
+let pendingOpenFile = [];
 let tray;
 function showMainWin() {
 	SimMusicWindows.mainWin.show();
@@ -25,11 +29,13 @@ const createWindow = () => {
 		minHeight: 700,
 		frame: false,
 		resizable: true,
+		show: false,
 		backgroundColor: "#1E9FFF",
 		title: "SimMusic",
 		webPreferences: { webSecurity: false, nodeIntegration: true, contextIsolation: false }
 	});
 	SimMusicWindows.mainWin.loadURL(path.join(__dirname, "frontend/main.html"));
+	setTimeout(() => {SimMusicWindows.mainWin.show();}, 50);
 	SimMusicWindows.mainWin.on("close", e => {
 		e.preventDefault();
 		SimMusicWindows.mainWin.hide();
@@ -59,9 +65,23 @@ app.whenReady().then(() => {
 		app.exit();
 		return;
 	}
-	app.on("second-instance", () => {
-		showMainWin();
+	const initOpenFile = process.argv[process.argv.length - 1];
+	if (process.argv.length != 1 && initOpenFile && fs.existsSync(initOpenFile)) pendingOpenFile.push(initOpenFile);
+	app.on("second-instance", (_event, argv) => {
+		const openFile = argv[argv.length - 1];
+		if (openFile && fs.existsSync(openFile)) {
+			if (!isMainWinLoaded) pendingOpenFile.push(openFile);
+			else {
+				showMainWin();
+				SimMusicWindows.mainWin.webContents.send("fileLaunch", openFile);
+			}
+		}
 	});
+});
+ipcMain.handle("mainWinLoaded", () => {
+	if (isMainWinLoaded) return [];
+	isMainWinLoaded = true;
+	return pendingOpenFile;
 });
 
 
@@ -178,17 +198,18 @@ ipcMain.handle("updateDesktopLyricsConfig", (_event, isProtected) => {
 let isMiniMode = false;
 ipcMain.handle("toggleMini", () => {
 	const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-	SimMusicWindows.mainWin.hide();
+	SimMusicWindows.mainWin.setOpacity(0);
 	if (isMiniMode) {
 		setTimeout(() => {
 			SimMusicWindows.mainWin.setMinimumSize(1000, 700);
 			SimMusicWindows.mainWin.setSize(1000, 700);
 			SimMusicWindows.mainWin.setPosition(width / 2 - 500, height / 2 - 350);
 			SimMusicWindows.mainWin.setResizable(true);
+			SimMusicWindows.mainWin.setHasShadow(true);
 			SimMusicWindows.mainWin.setAlwaysOnTop(false);
 			SimMusicWindows.mainWin.setSkipTaskbar(false);
-			SimMusicWindows.mainWin.show();
-		}, 500);
+			SimMusicWindows.mainWin.setOpacity(1);
+		}, 50);
 		return isMiniMode = false;
 	} else {
 		setTimeout(() => {
@@ -196,18 +217,57 @@ ipcMain.handle("toggleMini", () => {
 			SimMusicWindows.mainWin.setMinimumSize(340, 60);
 			SimMusicWindows.mainWin.setSize(340, 60);
 			SimMusicWindows.mainWin.setResizable(false);
+			SimMusicWindows.mainWin.setHasShadow(false);
 			SimMusicWindows.mainWin.setAlwaysOnTop(true);
 			SimMusicWindows.mainWin.setSkipTaskbar(true);
 			SimMusicWindows.mainWin.setPosition(width - 360, height - 90);
-			SimMusicWindows.mainWin.show();
-		}, 500);
+			SimMusicWindows.mainWin.setOpacity(.98);
+		}, 50);
 		return isMiniMode = true;
 	}
 });
 
 
 
-// 主窗口调用
+
+// 文件格式关联
+const fileRegAppId = "com.simsv.music";
+const fileRegFileExt = [".mp3", ".flac", ".wav"];
+const fileRegAppPath = process.execPath;
+const fileRegBatPath = path.join(os.tmpdir(), "SimMusicRegister.bat");
+function registerFileExt(isReg) {
+    let commands = `
+@echo off
+:: Check for Administrator permissions
+net session >nul 2>&1
+if %errorLevel% neq 0 (
+	echo Requesting Administrator permissions...
+	powershell.exe -Command "Start-Process '%~0' -Verb RunAs"
+	exit /B
+)
+`;
+	if (isReg) {
+		commands += `REG ADD "HKEY_CLASSES_ROOT\\${fileRegAppId}\\shell\\open\\command" /ve /d "\\"${fileRegAppPath}\\" \\"%%1\\"" /f\n`;
+		commands += `REG ADD "HKEY_CLASSES_ROOT\\${fileRegAppId}\\DefaultIcon" /ve /d "\\"${path.dirname(fileRegAppPath)}\\resources\\file-icon.ico\\",0" /f\n`;
+		fileRegFileExt.forEach(ext => {
+			commands += `REG ADD "HKEY_CLASSES_ROOT\\${ext}" /ve /d "${fileRegAppId}" /f\n`;
+		});
+	} else {
+		commands += `REG DELETE "HKEY_CLASSES_ROOT\\${fileRegAppId}\\shell\\open\\command" /ve /f\n`;
+	}
+    fs.writeFileSync(fileRegBatPath, commands, { encoding: 'utf-8' });
+	try { exec(`cmd.exe /c "${fileRegBatPath}"`); } catch {}
+}
+ipcMain.handle("regFileExt", (_event, isReg) => {
+	return registerFileExt(isReg);
+});
+
+
+
+
+
+
+// 主窗口其他调用
 ipcMain.handle("pickFolder", () => {
 	return dialog.showOpenDialogSync(SimMusicWindows.mainWin, {
 		title: "选择目录 - SimMusic",
@@ -243,3 +303,6 @@ ipcMain.handle("openDevtools", () => {
 			document.body.classList.remove('platform-windows');`);
 	});
 });
+
+
+

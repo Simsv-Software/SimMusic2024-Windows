@@ -56,11 +56,13 @@ const SimAPTools = {
 	},
 }
 
+
+// 初始化SimAP
 const switchMusic = (playConfig) => {
 	// 初始化界面
 	document.getElementById("album").src = document.getElementById("albumBottom").src = playConfig.album;
 	document.querySelector(".musicInfo>b").textContent = document.querySelector(".musicInfoBottom>b").textContent = playConfig.title;
-	document.querySelector(".musicInfo>div").textContent = document.querySelector(".musicInfoBottom>div").textContent = playConfig.artist;
+	document.querySelector(".musicInfo>div").textContent = document.querySelector("#bottomArtist").textContent = playConfig.artist;
 	document.getElementById("audio").src = playConfig.audio;
 	document.getElementById("audio").currentTime = 0;
 	document.body.classList.add("withCurrentMusic");
@@ -74,10 +76,10 @@ const switchMusic = (playConfig) => {
 	// 初始化背景
 	document.getElementById("album").onload = () => {
 		const themeColors = SimAPTools.getTopColors(document.getElementById("album"));
-		document.getElementById("background").style.background = `rgb(${themeColors[0].join(",")})`;
-		document.getElementById("animationCenter").style.background = `rgb(${themeColors[1] ? themeColors[1].join(",") : "255,255,255"})`;
-		document.getElementById("animationLeft").style.background = `rgba(${themeColors[2] ? themeColors[2].join(",") : "255,255,255"},.8)`;
-		document.getElementById("animationRight").style.background = `rgba(${themeColors[3] ? themeColors[3].join(",") : "255,255,255"},.6)`;
+		PlayerBackground.update(`rgb(${themeColors[0].join(",")})`, [
+								`rgb(${themeColors[1] ? themeColors[1].join(",") : "255,255,255"})`,
+								`rgb(${themeColors[2] ? themeColors[2].join(",") : "255,255,255"})`,
+								`rgb(${themeColors[3] ? themeColors[3].join(",") : "255,255,255"})` ]);
 		const themeColorNum = Math.min( 255 / (themeColors[0][0] + themeColors[0][1] + themeColors[0][2] + 1), 1);
 		document.body.style.setProperty("--SimAPTheme", `rgb(${themeColors[0].map(num => num * themeColorNum).join(",")})`);
 	}
@@ -90,13 +92,20 @@ const switchMusic = (playConfig) => {
 		SimAPProgress.max = SimAPProgressBottom.max = audio.duration;
 		SimAPProgress.setValue(0); SimAPProgressBottom.setValue(0);
 		duration.textContent = SimAPTools.formatTime(audio.duration);
-		SimAPProgress.onchange = SimAPProgressBottom.onchange = value => { audio.currentTime = value; }
+		SimAPProgress.onchange = SimAPProgressBottom.onchange = value => {
+			audio.currentTime = value;
+			setMiniModeStatus(`${SimAPTools.formatTime(value)} / ${duration.textContent}`);
+		}
+		SimAPProgress.ondrag = SimAPProgressBottom.ondrag = value => {
+			current.textContent = SimAPTools.formatTime(value);
+			setMiniModeStatus(`${SimAPTools.formatTime(value)} / ${duration.textContent}`);
+		}
 		if (playConfig.play) audio.play(); else audio.pause();
 	};
 	audio.ontimeupdate = () => {
 		document.body.classList.remove("musicLoading");
 		SimAPProgress.setValue(audio.currentTime); SimAPProgressBottom.setValue(audio.currentTime);
-		current.textContent = SimAPTools.formatTime(audio.currentTime);
+		if (!SimAPProgress.progressElement.classList.contains("dragging")) current.textContent = SimAPTools.formatTime(audio.currentTime);
 		document.body.classList[!audio.paused ? "add" : "remove"]("playing");
 		SimAPControls.loadAudioState();
 	};
@@ -134,6 +143,73 @@ const switchMusic = (playConfig) => {
 	SimAPControls.loadConfig();
 };
 
+
+
+// 流光背景控制器
+const PlayerBackground = {
+	init() {
+		canvas = document.getElementById("backgroundAnimation");
+		this.ctx = canvas.getContext("2d");
+		canvas.width = window.innerWidth;
+		canvas.height = window.innerHeight;
+		window.addEventListener("resize", () => {
+			canvas.width = window.innerWidth;
+			canvas.height = window.innerHeight;
+		});
+		this.blobs = [];
+		this.animate(true);
+	},
+	animate(isInit) {
+		requestAnimationFrame(() => {PlayerBackground.animate();});
+		if (!document.body.classList.contains("playing") && !isInit) return;
+		const ctx = PlayerBackground.ctx;
+		ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+		for (const blob of PlayerBackground.blobs) {
+			// 位移
+			blob.x += blob.dx;
+			blob.y += blob.dy;
+			if (blob.x - blob.radius < 0 || blob.x + blob.radius > window.innerWidth) blob.dx *= -1;
+			if (blob.y - blob.radius < 0 || blob.y + blob.radius > window.innerHeight) blob.dy *= -1;
+			// 绘制
+		}
+		PlayerBackground.drawBlobs();
+	},
+	update(mainColor, subColors) {
+		document.getElementById("background").style.background = mainColor;
+		this.mainColor = mainColor;
+		this.blobs = [];
+        for (let i = 0; i < 3; i++) {
+            this.blobs.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * screen.width / 3 + screen.width / 5,
+                color: subColors[i],
+                dx: ((Math.random() < 0.5) ? 1 : -1) * (Math.random() * 0.5 + 0.5),
+                dy: ((Math.random() < 0.5) ? 1 : -1) * (Math.random() * 0.5 + 0.5),
+            });
+        }
+		PlayerBackground.drawBlobs();
+	},
+	drawBlobs() {
+		const ctx = PlayerBackground.ctx;
+		for (const blob of PlayerBackground.blobs) {
+			ctx.beginPath();
+			const gradient = ctx.createRadialGradient(blob.x, blob.y, 0, blob.x, blob.y, blob.radius);
+			gradient.addColorStop(0, blob.color);
+			gradient.addColorStop(1, "transparent");
+			ctx.fillStyle = gradient;
+			ctx.arc(blob.x, blob.y, blob.radius, 0, Math.PI * 2);
+			ctx.fill();
+		}
+	}
+}
+PlayerBackground.init();
+
+
+
+// 播放控件
+const SimAPProgress = new SimProgress(document.getElementById("progressBar"));
+const SimAPProgressBottom = new SimProgress(document.getElementById("bottomProgressBar"));
 const SimAPControls = {
 	loadAudioState() {
 		const playing = document.body.classList.contains("playing");
@@ -224,10 +300,13 @@ const SimAPControls = {
 	}
 };
 
+
+
+// 播放器显隐处理
 const SimAPUI = {
 	show() {
 		if (this.playingAnimation) return;
-		if (document.body.classList.contains("playerShown")) return;
+		if (document.body.classList.contains("playerShown") || document.body.classList.contains("miniMode")) return;
 		if (!config.getItem("playList").length || !document.getElementById("album").src) return;
 		document.getElementById("playPage").hidden = false;
 		this.playingAnimation = true;
@@ -260,6 +339,8 @@ const SimAPUI = {
 }
 ipcRenderer.invoke("musicPause");
 
+
+// 处理键盘操作
 let keydownLock;
 document.documentElement.addEventListener("keydown", e => {
 	if (keydownLock) return;
@@ -267,6 +348,7 @@ document.documentElement.addEventListener("keydown", e => {
 	setTimeout(() => { keydownLock = false; }, 150)
 	if (document.activeElement.tagName.toLowerCase() == "input") return;
 	const audio = document.getElementById("audio");
+	const duration = document.getElementById("progressDuration").textContent;
 	switch (e.key) {
 		case " ":
 			SimAPControls.togglePlay();
@@ -278,10 +360,14 @@ document.documentElement.addEventListener("keydown", e => {
 			config.setItem("volume", Math.max(0, config.getItem("volume") - .05));
 			break;
 		case "ArrowRight":
-			audio.currentTime = Math.min(audio.duration, audio.currentTime + 5);
+			const value1 = Math.min(audio.duration, audio.currentTime + 5);
+			audio.currentTime = value1;
+			setMiniModeStatus(`${SimAPTools.formatTime(value1)} / ${duration}`);
 			break;
 		case "ArrowLeft":
-			audio.currentTime = Math.max(0, audio.currentTime - 5);
+			const value2 = Math.max(0, audio.currentTime - 5);
+			audio.currentTime = value2;
+			setMiniModeStatus(`${SimAPTools.formatTime(value2)} / ${duration}`);
 			break;
 		case "Escape":
 			SimAPUI.hide();
@@ -291,6 +377,7 @@ document.documentElement.addEventListener("keydown", e => {
 });
 
 
+// 音量相关操作
 const SimAPVolume = new SimProgress(document.getElementById("volBar"));
 const SimAPVolumeBottom = new SimProgress(document.getElementById("volBarBottom"));
 const loadVolumeUi = () => {
@@ -299,6 +386,7 @@ const loadVolumeUi = () => {
 	SimAPVolume.setValue(value);
 	SimAPVolumeBottom.setValue(value);
 	SimAPControls.toggleMuted(false);
+	if (window.setMiniModeStatus) setMiniModeStatus(`音量：${Math.round(value * 100)}%`);
 }
 loadVolumeUi();
 config.listenChange("volume", loadVolumeUi);
@@ -308,19 +396,18 @@ document.querySelector(".volBtn").onpointerdown = e => {e.stopPropagation();};
 const handleWheel = e => {
 	e.preventDefault();
 	const value = config.getItem("volume");
-	config.setItem("volume", e.deltaY > 0 ? Math.max(0, config.getItem("volume") - .05) : Math.min(1, config.getItem("volume") + .05));
+	config.setItem("volume", e.deltaY > 0 ? Math.max(0, value - .05) : Math.min(1, value + .05));
 };
 document.addEventListener("wheel", e => { if (document.body.classList.contains("volume")) handleWheel(e); }, {passive: false});
 document.querySelector(".volBtn").onwheel = () => { document.body.classList.add("volume"); };
-document.querySelector(".volBtnBottom").onwheel = e => { if (!document.body.classList.contains("volume")) handleWheel(e); };
+document.querySelector(".volBtnBottom").onwheel = e => { handleWheel(e); };
+document.querySelector(".bottom").onwheel = e => { if (document.body.classList.contains("miniMode")) handleWheel(e); };
 
 
-const SimAPProgress = new SimProgress(document.getElementById("progressBar"));
-const SimAPProgressBottom = new SimProgress(document.getElementById("bottomProgressBar"));
 
-
+// 响应配置更新
 config.listenChange("backgroundBlur", SimAPControls.loadConfig);
 config.listenChange("lyricBlur", SimAPControls.loadConfig);
 config.listenChange("lyricSize", SimAPControls.loadConfig);
 config.listenChange("lyricSpace", SimAPControls.loadConfig);
-config.listenChange("lyricTranslation", SimAPControls.loadConfig);
+config.listenChange("lyricTranslation", () => {SimAPControls.loadConfig(); updateDesktopLyricsConfig();});
