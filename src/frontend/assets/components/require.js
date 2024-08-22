@@ -4,4 +4,3 @@ const path = require("path");
 const musicMetadata = require("music-metadata");
 const nodeId3 = require("node-id3");
 const fflate = require("fflate");
-const flacTagger = require("flac-tagger");

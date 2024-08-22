@@ -1,4 +1,4 @@
-SimMusicVersion = "0.1.1";
+SimMusicVersion = "0.1.2";
 
 
 // 窗口处理
@@ -215,7 +215,6 @@ const ExtensionRuntime = {
 					const jsCode = fflate.strFromU8(unzipped[filename]);
 					code += jsCode + "\n";
 				}
-				console.log(code)
 				const extData = config.getItem("ext");
 				extData[packageId] = {
 					version: manifest.version,
@@ -913,7 +912,7 @@ const PlayerController = {
 		document.getElementById("playList").innerHTML = "";
 		config.getItem("playList").forEach(file => {
 			const div = this.createListElement(file);
-			document.getElementById("playList").appendChild(div);
+			if (div) document.getElementById("playList").appendChild(div);
 		});
 		this.loadMusicListActive();
 	},
@@ -940,6 +939,7 @@ const PlayerController = {
 			} 
 		} else {
 			const div = this.createListElement(file);
+			if (!div) return;
 			if (!activeDiv) return alert("当前没有正在播放的曲目。");
 			if (toNext)	activeDiv.insertAdjacentElement("afterend", div);
 			else document.getElementById("playList").appendChild(div);
@@ -950,6 +950,7 @@ const PlayerController = {
 	},
 	// 创建列表元素（用于渲染列表&插入下一首播放）
 	createListElement(file) {
+		if (!lastMusicIndex[file]) return;
 		const div = document.createElement("div");
 		div.innerHTML = `
 			<img src="assets/placeholder.svg" onerror="this.src='assets/placeholder.svg'">
@@ -984,8 +985,8 @@ const PlayerController = {
 						document.getElementById("audio").remove();
 						const audio = document.createElement("audio");
 						audio.id = "audio";
-						audio.volume = config.getItem("volume");
 						document.body.appendChild(audio);
+						loadVolumeUi();
 					} else {
 						SimAPControls.next();
 					}
@@ -1212,8 +1213,8 @@ function setMiniModeStatus(text) {
 // 系统集成
 config.listenChange("systemMenu", value => {ipcRenderer.invoke("regFileExt", value);})
 ipcRenderer.on("fileLaunch", (_event, file) => {
+	file = "file:" + file;
 	updateMusicIndex([file], () => {
-		file = "file:" + file;
 		const list = config.getItem("playList");
 		if (list.includes(file)) PlayerController.switchMusic(file);
 		else PlayerController.switchMusicWithList(file, [file].concat(list));
@@ -1229,22 +1230,25 @@ const SettingsPage = {
 	data: [
 		{type: "title", text: "通用配置"},
 		{type: "boolean", text: "不驻留后台进程", description: "关闭主界面时停止播放并完全退出应用。", configItem: "disableBackground"},
-		{type: "boolean", text: "注册系统菜单", description: "开启后，您可以在音频文件右键的「打开方式」菜单中选择 SimMusic 进行播放。请在移除 SimMusic 前关闭此选项。", configItem: "systemMenu"},
+		{type: "boolean", text: "注册系统菜单", badges: ["experimental"], description: "开启后，您可以在音频文件右键的「打开方式」菜单中选择 SimMusic 进行播放。在移动 SimMusic 程序目录或移除 SimMusic 前，您需要先关闭此选项。", configItem: "systemMenu"},
 		{type: "title", text: "音频扫描"},
 		{type: "input", text: "音频格式", description: "扫描本地音乐时的音频文件扩展名，以空格分隔。", configItem: "musicFormats"},
 		{type: "button", text: "清除音频索引", description: "若您更改了音频元数据，可在此删除索引数据以重新从文件读取。", button: "清除", onclick: () => { SimMusicTools.writeMusicIndex({}, () => { alert("索引数据已清除，按「确定」重载此应用生效。", () => { ipcRenderer.invoke("restart"); }); }); }},
 		{type: "title", text: "播放界面"},
 		{type: "boolean", text: "背景动态混色", description: "关闭后可减少播放页对硬件资源的占用。", configItem: "backgroundBlur"},
-		{type: "boolean", text: "播放页 3D 特效", description: "在播放页的歌曲信息、播放列表与歌词界面使用 3D 视觉效果。", configItem: "3dEffect"},
-		{type: "boolean", text: "歌词层级虚化", description: "若无需虚化效果或需要提升性能可关闭此功能。", configItem: "lyricBlur"},
+		{type: "boolean", text: "3D 特效", badges: ["experimental"], description: "在播放页的歌曲信息、播放列表与歌词视图使用 3D 视觉效果。", configItem: "3dEffect"},
 		{type: "boolean", text: "对播放按钮应用主题色", configItem: "playBtnColor"},
+		{type: "title", text: "播放控制"},
+		{type: "boolean", text: "快速重播", description: "在曲目即将结束时按「快退」按钮以回到当前曲目的开头。", configItem: "fastPlayback"},
+		{type: "boolean", text: "音频淡入淡出", description: "在按下「播放」或「暂停」时对音频的输出音量使用渐变效果。", configItem: "audioFade"},
+		{type: "button", text: "均衡器", badges: ["pending"], description: "下次一定。", button: "配置", onclick: () => { alert("还没写。下次一定。"); }},
+		{type: "title", text: "歌词视图"},
+		{type: "boolean", text: "层级虚化", description: "若无需虚化效果或需要提升性能可关闭此功能。", configItem: "lyricBlur"},
+		{type: "select", text: "文字对齐", options: [["left", "左端对齐"], ["center", "居中对齐"]], description: "此配置项切换曲目生效。", configItem: "lyricAlign"},
 		{type: "range", text: "歌词字号", configItem: "lyricSize", min: 1, max: 3},
 		{type: "range", text: "歌词间距", configItem: "lyricSpace", min: .2, max: 1},
 		{type: "boolean", text: "歌词多语言支持", description: "开启后，时间戳一致的不同歌词将作为多语言翻译同时渲染。此配置项切换曲目生效。", configItem: "lyricMultiLang"},
-		{type: "range", text: "歌词翻译字号", attachTo: "lyricMultiLang" ,configItem: "lyricTranslation", min: .5, max: 1},
-		{type: "title", text: "播放控制"},
-		{type: "boolean", text: "快速重播", description: "在曲目即将结束时按「快退」按钮以回到当前曲目的开头。", configItem: "fastPlayback"},
-		{type: "button", text: "均衡器", description: "下次一定。", button: "配置", onclick: () => { alert("还没写。下次一定。"); }},
+		{type: "range", text: "歌词翻译字号", description: "同时控制歌词视图与桌面歌词中的翻译字号。", attachTo: "lyricMultiLang" ,configItem: "lyricTranslation", min: .5, max: 1},
 		{type: "title", text: "桌面歌词"},
 		{type: "boolean", text: "启动时打开", configItem: "autoDesktopLyrics"},
 		{type: "boolean", text: "在截图中隐藏", description: "其他应用截图或录屏时隐藏桌面歌词的内容，与多数截图或录屏软件相兼容，支持 Windows 10 2004 以上版本及 Windows 11。此功能不会影响您查看歌词，对采集卡等外置硬件无效。", configItem: "desktopLyricsProtection"},
@@ -1264,8 +1268,20 @@ const SettingsPage = {
 		const settingsContainer = document.getElementById("settingsContainer");
 		SettingsPage.loadElementHeight();
 		if (settingsContainer.innerHTML) return;
+		const badges = {
+			"experimental": "<i>&#xED3F;</i>实验性",
+			"pending": "<i>&#xF4C8;</i>暂未支持"
+		};
 		this.data.forEach(data => {
 			const div = document.createElement("div");
+			const normalContent = `
+				<section>
+					<div>
+						${SimMusicTools.escapeHtml(data.text)}
+						${data.badges ? data.badges.map(badge => `<badge>${badges[badge] ?? "<i>&#xF046;</i>未知"}</badge>`) : ""}
+					</div>
+					${data.description ? `<span>${SimMusicTools.escapeHtml(data.description)}</span>` : ""}
+				</section>`;
 			switch (data.type) {
 				case "title":
 					div.classList.add("title");
@@ -1273,12 +1289,7 @@ const SettingsPage = {
 					break;
 				case "boolean":
 					div.classList.add("block");
-					div.innerHTML = `
-						<section>
-							<div>${SimMusicTools.escapeHtml(data.text)}</div>
-							${data.description ? `<span>${SimMusicTools.escapeHtml(data.description)}</span>` : ""}
-						</section>
-						<div class="toggle"></div>`;
+					div.innerHTML = `${normalContent}<div class="toggle"></div>`;
 					div.classList.add(config.getItem(data.configItem) ? "on" : "off");
 					div.onclick = () => {
 						const currentItem = config.getItem(data.configItem);
@@ -1289,23 +1300,13 @@ const SettingsPage = {
 					break;
 				case "range":
 					div.classList.add("block");
-					div.innerHTML = `
-						<section>
-							<div>${SimMusicTools.escapeHtml(data.text)}</div>
-							${data.description ? `<span>${SimMusicTools.escapeHtml(data.description)}</span>` : ""}
-						</section>
-						<div class="range" min="${data.min}" max="${data.max}" value="${config.getItem(data.configItem)}"></div>`;
+					div.innerHTML = `${normalContent}<div class="range" min="${data.min}" max="${data.max}" value="${config.getItem(data.configItem)}"></div>`;
 					const range = new SimProgress(div.querySelector(".range"));
 					range.ondrag = value => { config.setItem(data.configItem, value); };
 					break;
 				case "input":
 					div.classList.add("block");
-					div.innerHTML = `
-						<section>
-							<div>${SimMusicTools.escapeHtml(data.text)}</div>
-							${data.description ? `<span>${SimMusicTools.escapeHtml(data.description)}</span>` : ""}
-						</section>
-						<input type="${data.inputType ?? "text"}">`;
+					div.innerHTML = `${normalContent}<input type="${data.inputType ?? "text"}">`;
 					const input = div.querySelector("input");
 					input.value = config.getItem(data.configItem);
 					input.autocomplete = input.spellcheck = false;
@@ -1313,12 +1314,7 @@ const SettingsPage = {
 					break;
 				case "select":
 					div.classList.add("block");
-					div.innerHTML = `
-						<section>
-							<div>${SimMusicTools.escapeHtml(data.text)}</div>
-							${data.description ? `<span>${SimMusicTools.escapeHtml(data.description)}</span>` : ""}
-						</section>
-						<select></select>`;
+					div.innerHTML = `${normalContent}<select></select>`;
 					const select = div.querySelector("select");
 					data.options.forEach(option => {
 						const optionEle = document.createElement("option");
@@ -1331,12 +1327,7 @@ const SettingsPage = {
 					break;
 				case "color":
 					div.classList.add("block");
-					div.innerHTML = `
-						<section>
-							<div>${SimMusicTools.escapeHtml(data.text)}</div>
-							${data.description ? `<span>${SimMusicTools.escapeHtml(data.description)}</span>` : ""}
-						</section>
-						<div class="colorInput"><span></span><input type="color"></div>`;
+					div.innerHTML = `${normalContent}<div class="colorInput"><span></span><input type="color"></div>`;
 					const colorInput = div.querySelector("input");
 					colorInput.value = config.getItem(data.configItem);
 					div.querySelector(".colorInput>span").textContent = config.getItem(data.configItem);
@@ -1349,12 +1340,7 @@ const SettingsPage = {
 					break;
 				case "button":
 					div.classList.add("block");
-					div.innerHTML = `
-						<section>
-							<div>${SimMusicTools.escapeHtml(data.text)}</div>
-							${data.description ? `<span>${SimMusicTools.escapeHtml(data.description)}</span>` : ""}
-						</section>
-						<button class="sub">${SimMusicTools.escapeHtml(data.button)}</button>`;
+					div.innerHTML = `${normalContent}<button class="sub">${SimMusicTools.escapeHtml(data.button)}</button>`;
 					div.onclick = data.onclick;
 					break;
 			}

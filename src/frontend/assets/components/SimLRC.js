@@ -127,7 +127,7 @@ class SimLRC {
 			});
 		}
 		refreshLrcProgress(true);
-		setTimeout(() => {container.querySelector("div.active").scrollIntoView({block: "center", behavior: "smooth"});});
+		setTimeout(() => {container.querySelector("div.active").scrollIntoView({block: "center", behavior: "smooth"});}, 50);
 		// 处理用户滚动
 		const handleUserScroll = () => {
 			if (document.body.classList.contains("volume")) return;

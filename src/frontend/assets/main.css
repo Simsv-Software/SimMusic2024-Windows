@@ -22,7 +22,7 @@ a{color:#1E9FFF;text-decoration:none;}
 a:hover{text-decoration:underline;}
 a:active{opacity:.8;text-decoration:underline;}
 input,select{background:rgba(0,0,0,.03);padding:8px 10px;border-radius:5px;border:0;font-size:1rem;font-family:inherit;width:100%;margin:5px 0;}
-
+::selection{background:#DAEFFF;color:black;}
 
 
 .left .leftBar div,.right .musicListTitle section b,
@@ -55,6 +55,12 @@ header i.active{color:#1E9FFF;}
 header #hidePlayerBtn{opacity:0;position:absolute;right:120px;pointer-events:none;}
 .playerShown header #hidePlayerBtn{opacity:1;pointer-events:all;}
 
+
+
+
+/* 主窗体 - 左右容器 */
+#homePage{height:100vh;transition:all .2s;}
+.playerShown #homePage{transform:scale(.98);border-radius:20px;transition:all .5s;}
 
 
 /* 主窗体 - 左侧界面 */
@@ -154,6 +160,7 @@ body:not(.disableHighlight) .right #musicListContainer .tableContainer table td>
 .right #settingsPage #settingsContainer .block.folded{margin-top:calc(-5px - var(--height));opacity:0;pointer-events:none;transform:scaleY(0);}
 .right #settingsPage #settingsContainer .block section, .right #extensionPage #extensionContainer>div section{width:100%;margin-right:10px;}
 .right #settingsPage #settingsContainer .block section div, .right #extensionPage #extensionContainer>div section div{font-size:1em;}
+.right #settingsPage #settingsContainer .block section div badge{font-size:.8em;background:rgba(0,0,0,.1);opacity:.5;padding:0 7px;margin-left:5px;margin-top:2px;vertical-align:top;border-radius:10px;display:inline-block;}
 .right #settingsPage #settingsContainer .block section span, .right #extensionPage #extensionContainer>div section span{display:block;font-size:.9em;opacity:.8;word-break:break-all;line-height:1.1em;margin-top:3px;}
 .right #settingsPage #settingsContainer .block button, .right #extensionPage #extensionContainer button{white-space:nowrap;}
 .right #settingsPage #settingsContainer .block .toggle{display:inline-block;height:20px;min-width:35px;max-width:35px;padding:2px;background:rgba(0,0,0,.05);border-radius:10px;vertical-align:middle;transition:background .2s;}
@@ -226,7 +233,7 @@ body:not(.miniModeStatus) .bottom .info .musicInfoBottom>div #miniModeStatus{tra
 
 
 /* 主窗体 - 播放内页 */
-#playPage{position:fixed;top:120vh;left:0;width:100%;height:100%;background:white;transition:top .3s;overflow:hidden;}
+#playPage{position:fixed;top:120vh;left:0;width:100%;height:100%;background:white;transition:top .3s;overflow:hidden;user-select:none;}
 .playerShown #playPage{top:0;}
 
 
@@ -242,6 +249,7 @@ body:not(.miniModeStatus) .bottom .info .musicInfoBottom>div #miniModeStatus{tra
 .miniMode .bottom #bottomProgressBar::after{display:none;}
 .miniMode .bottom .info{top:0;bottom:0!important;left:0;width:170px;bottom:10px;}
 .miniMode .bottom .info .img{width:60px;height:60px;border-radius:0;margin-right:10px;-webkit-app-region:drag;}
+.miniMode .bottom .info .img::after{display:none;}
 .miniMode .bottom .info .musicInfoBottom{font-size:1.1em;max-width:calc(100px / .75);zoom:.75;}
 .miniMode .bottom .info .musicInfoBottom>div{margin-top:-1px;}
 .miniMode .bottom .center{right:15px;zoom:.7;bottom:7.5px;width:220px;left:unset;}

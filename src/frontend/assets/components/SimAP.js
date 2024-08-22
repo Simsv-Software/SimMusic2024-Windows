@@ -106,6 +106,7 @@ const switchMusic = (playConfig) => {
 		document.body.classList.remove("musicLoading");
 		SimAPProgress.setValue(audio.currentTime); SimAPProgressBottom.setValue(audio.currentTime);
 		if (!SimAPProgress.progressElement.classList.contains("dragging")) current.textContent = SimAPTools.formatTime(audio.currentTime);
+		if (SimAPControls.audioFadeInterval) return;
 		document.body.classList[!audio.paused ? "add" : "remove"]("playing");
 		SimAPControls.loadAudioState();
 	};
@@ -138,6 +139,7 @@ const switchMusic = (playConfig) => {
 		activeColor: "var(--SimAPTheme)",
 		normalColor: "rgba(0,0,0,.4)",
 		multiLangSupport: config.getItem("lyricMultiLang"),
+		align: config.getItem("lyricAlign"),
 		callback: txt => { ipcRenderer.invoke("lrcUpdate", txt); }
 	});
 	SimAPControls.loadConfig();
@@ -145,7 +147,7 @@ const switchMusic = (playConfig) => {
 
 
 
-// 流光背景控制器
+// 动态混色控制器
 const PlayerBackground = {
 	init() {
 		canvas = document.getElementById("backgroundAnimation");
@@ -218,9 +220,36 @@ const SimAPControls = {
 	},
 	togglePlay() {
 		if (document.body.classList.contains("musicLoading")) return;
-		document.body.classList[audio.paused ? "add" : "remove"]("playing");
-		audio[audio.paused ? "play" : "pause"]();
+		const audio = document.getElementById("audio");
+		const isPlay = audio.paused;
+		document.body.classList[isPlay ? "add" : "remove"]("playing");
 		SimAPControls.loadAudioState();
+		clearInterval(this.audioFadeInterval);
+		// 音频淡入淡出处理
+		if (config.getItem("audioFade")) {
+			const configVolume = config.getItem("volume");
+			const volumeOffset = configVolume / 10;
+			if (isPlay) audio.play();
+			this.audioFadeInterval = setInterval(() => {
+				if (isPlay) {
+					const newVolume = audio.volume + volumeOffset;
+					if (newVolume > configVolume) {
+						clearInterval(SimAPControls.audioFadeInterval);
+						SimAPControls.audioFadeInterval = null;
+					} else audio.volume = newVolume;
+				} else {
+					const newVolume = audio.volume - volumeOffset;
+					if (newVolume < 0) {
+						clearInterval(SimAPControls.audioFadeInterval);
+						SimAPControls.audioFadeInterval = null;
+						audio.pause();
+					}
+					else audio.volume = newVolume;
+				} 
+			}, 50);
+		} else {
+			audio[isPlay ? "play" : "pause"]();
+		}
 	},
 	prev() {
 		const audio = document.getElementById("audio");
@@ -324,6 +353,7 @@ const SimAPUI = {
 	hide() {
 		if (this.playingAnimation) return;
 		if (!document.body.classList.contains("playerShown")) return;
+		document.exitFullscreen();
 		document.body.classList.remove("playerShown");
 		this.playingAnimation = true;
 		setTimeout(() => {
@@ -372,6 +402,10 @@ document.documentElement.addEventListener("keydown", e => {
 		case "Escape":
 			SimAPUI.hide();
 			document.body.classList.remove("volume");
+			break;
+		case "F11": 
+			if (!document.fullscreenElement && document.body.classList.contains("playerShown")) document.getElementById("playPage").requestFullscreen();
+			else document.exitFullscreen();
 			break;
 	}
 });
