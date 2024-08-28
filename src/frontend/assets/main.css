@@ -116,6 +116,10 @@ body:not(.disableHighlight) .right #musicListContainer .tableContainer table td>
 .right #musicListContainer .tableContainer table tr:active{background:rgba(0,0,0,.05);}
 .right #musicListContainer .tableContainer table tr.active{color:#1E9FFF;}
 .right #musicListContainer .tableContainer table tr.selected{background:#DAEFFF!important;}
+.right #musicListContainer .musicLocator{position:absolute;right:20px;bottom:100px;height:40px;width:40px;border:1px solid rgba(0,0,0,.1);border-radius:50%;background:rgba(252,252,252,.9);backdrop-filter:blur(20px);font-size:1.2em;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.right #musicListContainer .musicLocator:hover{color:#1E9FFF;}
+.right #musicListContainer .musicLocator:active{color:#1E9FFF;transform:scale(.95);filter:brightness(.95);}
+.right #musicListContainer .musicLocator.hidden{transform:scale(.2);opacity:0;pointer-events:none;}
 .right #musicListContainer .musicListErrorOverlay{position:absolute;inset:180px 0 80px 0;display:flex;align-items:center;justify-content:center;flex-direction:column;}
 .right #musicListContainer .musicListErrorOverlay img{width:120px;}
 .right #musicListContainer .musicListErrorOverlay div{opacity:.5;margin-top:10px;font-size:1.2em;text-align:center;}
@@ -203,6 +207,11 @@ body:not(.disableHighlight) .right #musicListContainer .tableContainer table td>
 .dragOver #dropTipContainer{opacity:1;}
 
 
+/* 主窗体 - 主题图片 */
+#themeImage{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;opacity:.05;z-index:40;transition:opacity .2s;}
+body:not(.themeImage) #themeImage{opacity:0;}
+.themeImage #bottom,.themeImage .musicListTitle,.themeImage .right .page .header,.themeImage .musicLocator{background:rgba(255,255,255,.9);}
+
 
 /* 主窗体 - 底部控件 */
 .bottom{position:fixed;bottom:-90px;height:80px;width:100%;background:rgba(252,252,252,.9);backdrop-filter:blur(20px);transition:bottom .2s;}
@@ -217,7 +226,7 @@ body:not(.disableHighlight) .right #musicListContainer .tableContainer table td>
 .bottom .info .img::after{content:"\EA78";font-size:2.5em;background:rgba(0,0,0,.2);position:absolute;inset:0;font-family:"icon";display:flex;align-items:center;justify-content:center;color:white;opacity:0;transition:opacity .2s;}
 .bottom .info .img:hover::after,.bottom .info .img:active::after{opacity:1;}
 .bottom .info .img>img{width:100%;height:100%;object-fit:cover;}
-.bottom .info .musicInfoBottom{max-width:200px;margin-bottom:5px;}
+.bottom .info .musicInfoBottom{max-width:200px;}
 .bottom .info .musicInfoBottom b{font-size:1.1em;}
 .bottom .info .musicInfoBottom>div{position:relative;}
 .bottom .info .musicInfoBottom>div div{transition:opacity .2s,transform .2s;}
@@ -233,7 +242,7 @@ body:not(.miniModeStatus) .bottom .info .musicInfoBottom>div #miniModeStatus{tra
 
 
 /* 主窗体 - 播放内页 */
-#playPage{position:fixed;top:120vh;left:0;width:100%;height:100%;background:white;transition:top .3s;overflow:hidden;user-select:none;}
+#playPage{position:fixed;top:120vh;left:0;width:100%;height:100%;background:white;transition:top .3s;overflow:hidden;user-select:none;z-index:50;}
 .playerShown #playPage{top:0;}
 
 
@@ -250,7 +259,7 @@ body:not(.miniModeStatus) .bottom .info .musicInfoBottom>div #miniModeStatus{tra
 .miniMode .bottom .info{top:0;bottom:0!important;left:0;width:170px;bottom:10px;}
 .miniMode .bottom .info .img{width:60px;height:60px;border-radius:0;margin-right:10px;-webkit-app-region:drag;}
 .miniMode .bottom .info .img::after{display:none;}
-.miniMode .bottom .info .musicInfoBottom{font-size:1.1em;max-width:calc(100px / .75);zoom:.75;}
+.miniMode .bottom .info .musicInfoBottom{font-size:1.1em;max-width:calc(100px / .75);zoom:.75;margin-bottom:5px;}
 .miniMode .bottom .info .musicInfoBottom>div{margin-top:-1px;}
 .miniMode .bottom .center{right:15px;zoom:.7;bottom:7.5px;width:220px;left:unset;}
 .miniMode .bottom .center .bottomListBtn{display:none;}

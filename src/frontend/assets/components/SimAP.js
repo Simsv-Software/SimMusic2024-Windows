@@ -73,6 +73,7 @@ const switchMusic = (playConfig) => {
 	});
 	SimAPControls.loadLoop();
 	document.title = playConfig.title + " - SimMusic";
+	loadThemeImage();
 	// 初始化背景
 	document.getElementById("album").onload = () => {
 		const themeColors = SimAPTools.getTopColors(document.getElementById("album"));
@@ -163,6 +164,7 @@ const PlayerBackground = {
 	},
 	animate(isInit) {
 		requestAnimationFrame(() => {PlayerBackground.animate();});
+		if (!config.getItem("backgroundBlur")) return;
 		if (!document.body.classList.contains("playing") && !isInit) return;
 		const ctx = PlayerBackground.ctx;
 		ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
@@ -172,7 +174,6 @@ const PlayerBackground = {
 			blob.y += blob.dy;
 			if (blob.x - blob.radius < 0 || blob.x + blob.radius > window.innerWidth) blob.dx *= -1;
 			if (blob.y - blob.radius < 0 || blob.y + blob.radius > window.innerHeight) blob.dy *= -1;
-			// 绘制
 		}
 		PlayerBackground.drawBlobs();
 	},
@@ -180,16 +181,16 @@ const PlayerBackground = {
 		document.getElementById("background").style.background = mainColor;
 		this.mainColor = mainColor;
 		this.blobs = [];
-        for (let i = 0; i < 3; i++) {
-            this.blobs.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                radius: Math.random() * screen.width / 3 + screen.width / 5,
-                color: subColors[i],
-                dx: ((Math.random() < 0.5) ? 1 : -1) * (Math.random() * 0.5 + 0.5),
-                dy: ((Math.random() < 0.5) ? 1 : -1) * (Math.random() * 0.5 + 0.5),
-            });
-        }
+		for (let i = 0; i < 3; i++) {
+			this.blobs.push({
+				x: Math.random() * canvas.width,
+				y: Math.random() * canvas.height,
+				radius: Math.random() * screen.width / 3 + screen.width / 5,
+				color: subColors[i],
+				dx: ((Math.random() < 0.5) ? 1 : -1) * (Math.random() * 0.5 + 0.5),
+				dy: ((Math.random() < 0.5) ? 1 : -1) * (Math.random() * 0.5 + 0.5),
+			});
+		}
 		PlayerBackground.drawBlobs();
 	},
 	drawBlobs() {
@@ -224,13 +225,13 @@ const SimAPControls = {
 		const isPlay = audio.paused;
 		document.body.classList[isPlay ? "add" : "remove"]("playing");
 		SimAPControls.loadAudioState();
-		clearInterval(this.audioFadeInterval);
+		clearInterval(SimAPControls.audioFadeInterval);
 		// 音频淡入淡出处理
-		if (config.getItem("audioFade")) {
+		if (config.getItem("audioFade") && audio.volume) {
 			const configVolume = config.getItem("volume");
 			const volumeOffset = configVolume / 10;
 			if (isPlay) audio.play();
-			this.audioFadeInterval = setInterval(() => {
+			SimAPControls.audioFadeInterval = setInterval(() => {
 				if (isPlay) {
 					const newVolume = audio.volume + volumeOffset;
 					if (newVolume > configVolume) {
@@ -253,10 +254,10 @@ const SimAPControls = {
 	},
 	prev() {
 		const audio = document.getElementById("audio");
-		if (!config.getItem("fastPlayback") || audio.currentTime / audio.duration < .9) this.switchIndex(-1);
+		if (!config.getItem("fastPlayback") || audio.currentTime / audio.duration < .9) SimAPControls.switchIndex(-1);
 		else audio.currentTime = 0;
 	},
-	next() {this.switchIndex(1);},
+	next() {SimAPControls.switchIndex(1);},
 	switchIndex(offset) {
 		const list = config.getItem("playList");
 		const currentPlayingIndex = list.indexOf(config.getItem("currentMusic"));
@@ -353,7 +354,7 @@ const SimAPUI = {
 	hide() {
 		if (this.playingAnimation) return;
 		if (!document.body.classList.contains("playerShown")) return;
-		document.exitFullscreen();
+		document.exitFullscreen().catch(() => {});
 		document.body.classList.remove("playerShown");
 		this.playingAnimation = true;
 		setTimeout(() => {

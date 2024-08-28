@@ -40,7 +40,7 @@
 			// 移动窗口
 			function moveWindow(e) {
 				config.setItem("desktopLyricsTop", e.pageY);
-				config.setItem("desktopLyricsLeft", Math.max(e.pageX, ));
+				config.setItem("desktopLyricsLeft", e.pageX);
 				reloadConfig();
 			}
 			

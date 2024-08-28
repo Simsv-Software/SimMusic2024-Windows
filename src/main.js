@@ -75,6 +75,8 @@ app.whenReady().then(() => {
 				showMainWin();
 				SimMusicWindows.mainWin.webContents.send("fileLaunch", openFile);
 			}
+		} else {
+			showMainWin();
 		}
 	});
 });
@@ -203,7 +205,7 @@ ipcMain.handle("toggleMini", () => {
 		setTimeout(() => {
 			SimMusicWindows.mainWin.setMinimumSize(1000, 700);
 			SimMusicWindows.mainWin.setSize(1000, 700);
-			SimMusicWindows.mainWin.setPosition(width / 2 - 500, height / 2 - 350);
+			SimMusicWindows.mainWin.setPosition(parseInt(width / 2 - 500), parseInt(height / 2 - 350));
 			SimMusicWindows.mainWin.setResizable(true);
 			SimMusicWindows.mainWin.setHasShadow(true);
 			SimMusicWindows.mainWin.setAlwaysOnTop(false);

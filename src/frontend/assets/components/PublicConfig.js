@@ -7,6 +7,8 @@ const defaultConfig = {
 	loop: 0,
 	lrcShow: true,
 	musicFormats: ".mp3 .wav .flac",
+	showLocator: true,
+	themeImageType: "cover",
 	backgroundBlur: true,
 	audioFade: true,
 	lyricBlur: true,

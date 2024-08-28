@@ -1,4 +1,4 @@
-SimMusicVersion = "0.1.2";
+SimMusicVersion = "0.1.3";
 
 
 // 窗口处理
@@ -49,11 +49,12 @@ document.documentElement.onkeydown = e => {
 	if (document.activeElement.tagName.toLowerCase() == "input") return;
 	e.preventDefault();
 	if (document.activeElement.tagName.toLowerCase() == "input") return;
+	const moveOffset = e.ctrlKey ? 10 : 1;
 	switch (e.key.toLowerCase()) {
-		case "w": config.setItem("desktopLyricsTop", Math.max(config.getItem("desktopLyricsTop") - 2, 0)); break;
-		case "a": config.setItem("desktopLyricsLeft", Math.max(config.getItem("desktopLyricsLeft") - 2, 0)); break;
-		case "s": config.setItem("desktopLyricsTop", Math.min(config.getItem("desktopLyricsTop") + 2, screen.height - 100)); break;
-		case "d": config.setItem("desktopLyricsLeft", Math.min(config.getItem("desktopLyricsLeft") + 2, screen.width)); break;
+		case "w": config.setItem("desktopLyricsTop", Math.max(config.getItem("desktopLyricsTop") - moveOffset, 0)); break;
+		case "a": config.setItem("desktopLyricsLeft", Math.max(config.getItem("desktopLyricsLeft") - moveOffset, 0)); break;
+		case "s": config.setItem("desktopLyricsTop", Math.min(config.getItem("desktopLyricsTop") + moveOffset, screen.height - 100)); break;
+		case "d": config.setItem("desktopLyricsLeft", Math.min(config.getItem("desktopLyricsLeft") + moveOffset, screen.width)); break;
 	}
 };
 document.documentElement.ondragstart = e => {e.preventDefault();};
@@ -1001,7 +1002,27 @@ const PlayerController = {
 		const currentMusic = config.getItem("currentMusic");
 		document.querySelectorAll(".musicListContent>tr").forEach(tr => {
 			tr.classList[tr.dataset.file == currentMusic ? "add" : "remove"]("active");
-		})
+		});
+		document.querySelectorAll("#musicListContainer>div").forEach(div => {
+			const activeMusic = div.querySelector("tr.active");
+			const musicLocator = div.querySelector(".musicLocator");
+			const tableContainer = div.querySelector(".tableContainer")
+			if (activeMusic && config.getItem("showLocator")) {
+				musicLocator.classList.remove("hidden");
+				musicLocator.onclick = () => {
+					musicLocator.classList.add("hidden");
+					activeMusic.scrollIntoView({block: "center", behavior: "smooth"});
+					setTimeout(() => {activeMusic.classList.add("selected");}, 200);
+					setTimeout(() => {activeMusic.classList.remove("selected");}, 500);
+				};
+				tableContainer.onwheel = () => {
+					musicLocator.classList.remove("hidden");
+				};
+			} else {
+				musicLocator.classList.add("hidden");
+				tableContainer.onwheel = null;
+			}
+		});
 		document.querySelectorAll("#playList>div").forEach(div => {
 			if (div.dataset.file == currentMusic) {
 				div.classList.add("active");
@@ -1011,7 +1032,8 @@ const PlayerController = {
 					setTimeout(() => { PlayerController.listScrollLock = false; }, 500);
 				}
 			} else div.classList.remove("active");
-		})
+		});
+		loadThemeImage();
 	}
 }
 if (!config.getItem("lrcShow")) document.body.classList.add("hideLyrics");
@@ -1020,6 +1042,52 @@ config.listenChange("playBtnColor", loadPlayColor); loadPlayColor();
 const load3dEffect = () => { document.body.classList[config.getItem("3dEffect") ? "add" : "remove"]("threeEffect"); }
 config.listenChange("3dEffect", load3dEffect); load3dEffect();
 if (config.getItem("devMode", 1)) document.getElementById("devBtn").hidden = false;
+config.listenChange("showLocator", PlayerController.loadMusicListActive);
+
+
+
+// 主界面主题图片
+function loadThemeImage() {
+	if (!config.getItem("themeImage")) document.body.classList.remove("themeImage");
+	else {
+		const themeImage = document.getElementById("themeImage");
+		switch (config.getItem("themeImageType")) {
+			case "cover":
+				if (config.getItem("currentMusic")) {
+					document.body.classList.add("themeImage");
+					themeImage.src = document.getElementById("album").src;
+				} else {
+					document.body.classList.remove("themeImage");
+				}
+				break;
+			case "local":
+				document.body.classList.add("themeImage");
+				themeImage.src = config.getItem("themeImagePath");
+				break;
+		}
+		themeImage.style.filter = config.getItem("themeImageBlur") ? "blur(20px)" : "none";
+	}
+}
+document.getElementById("themeImage").onerror = () => {
+	document.body.classList.remove("themeImage");
+};
+config.listenChange("themeImage", loadThemeImage);
+config.listenChange("themeImageType", value => {
+	config.setItem("themeImagePath", "");
+	if (value == "local") {
+		const fileInput = document.createElement("input");
+		fileInput.type = "file";
+		fileInput.accept = "image/*";
+		fileInput.multiple = false;
+		fileInput.click();
+		fileInput.onchange = e => {
+			const file = e.target.files[0];
+			if (file) config.setItem("themeImagePath", file.path);
+		};
+	}
+});
+config.listenChange("themeImagePath", loadThemeImage);
+config.listenChange("themeImageBlur", loadThemeImage);
 
 
 
@@ -1147,21 +1215,41 @@ const DownloadController = {
 					const coverRes = await fetch(coverData)
 					coverArrBuffer = await coverRes.arrayBuffer();
 				}
-				const metadataResult = nodeId3.write({
-					title: lastMusicIndex[file].title,
-					artist: lastMusicIndex[file].artist,
-					album: lastMusicIndex[file].album,
-					unsynchronisedLyrics: {
-						language: "XXX",
-						text: lastMusicIndex[file].lyrics ? lastMusicIndex[file].lyrics : await ExtensionConfig[fileScheme].player.getLyrics(file)
-					},
-					image: {
-						type: {id: 3, name: "front cover"},
-						imageBuffer: Buffer.from(coverArrBuffer)
+				let metadataResult,mediaFormat,fileExtension;
+				try {
+					mediaFormat = (await musicMetadata.parseFile(tempPath)).format.container.toLowerCase();
+					switch (mediaFormat) {
+						case "flac":
+							const tagMap = {
+								title: lastMusicIndex[file].title,
+								artist: lastMusicIndex[file].artist,
+								album: lastMusicIndex[file].album,
+								lyrics: lastMusicIndex[file].lyrics ? lastMusicIndex[file].lyrics : await ExtensionConfig[fileScheme].player.getLyrics(file),
+							};
+							await flacTagger.writeFlacTags({ tagMap, picture: { buffer: Buffer.from(coverArrBuffer) } }, tempPath);
+							metadataResult = true;
+							fileExtension = "flac";
+							break;
+						default:
+							metadataResult = nodeId3.write({
+								title: lastMusicIndex[file].title,
+								artist: lastMusicIndex[file].artist,
+								album: lastMusicIndex[file].album,
+								unsynchronisedLyrics: {
+									language: "XXX",
+									text: lastMusicIndex[file].lyrics ? lastMusicIndex[file].lyrics : await ExtensionConfig[fileScheme].player.getLyrics(file)
+								},
+								image: {
+									type: {id: 3, name: "front cover"},
+									imageBuffer: Buffer.from(coverArrBuffer)
+								}
+							}, tempPath);
+							fileExtension = "mp3";
+							break;
 					}
-				}, tempPath);
+				} catch (err){console.log(err)}
 				if (metadataResult) {
-					const renameResult = this.renameDownloadFile(destination, fileName)
+					const renameResult = this.renameDownloadFile(destination, fileName, fileExtension)
 					if (renameResult) {
 						updateDownloadStatus("success", "曲目下载成功", 100);
 						element.dataset.fileName = renameResult;
@@ -1180,10 +1268,10 @@ const DownloadController = {
 		};
 		xhr.send();
 	},
-	renameDownloadFile(dir, filename) {
+	renameDownloadFile(dir, filename, ext) {
 		try {
 			const originalFile = path.join(dir, `${filename}.simtemp`);
-			const baseTargetFile = path.join(dir, `${filename}.mp3`);
+			const baseTargetFile = path.join(dir, `${filename}.${ext}`);
 			let targetFile = baseTargetFile;
 			let count = 1;
 			// 序号递增
@@ -1234,6 +1322,11 @@ const SettingsPage = {
 		{type: "title", text: "音频扫描"},
 		{type: "input", text: "音频格式", description: "扫描本地音乐时的音频文件扩展名，以空格分隔。", configItem: "musicFormats"},
 		{type: "button", text: "清除音频索引", description: "若您更改了音频元数据，可在此删除索引数据以重新从文件读取。", button: "清除", onclick: () => { SimMusicTools.writeMusicIndex({}, () => { alert("索引数据已清除，按「确定」重载此应用生效。", () => { ipcRenderer.invoke("restart"); }); }); }},
+		{type: "title", text: "歌单界面"},
+		{type: "boolean", text: "显示「曲目定位」按钮", configItem: "showLocator"},
+		{type: "boolean", text: "启用主题图片", description: "在 SimMusic 主界面显示主题图片。", configItem: "themeImage"},
+		{type: "select", text: "选择主题图片", options: [["cover", "曲目封面"], ["local", "本地文件"]], configItem: "themeImageType", attachTo: "themeImage"},
+		{type: "boolean", text: "图片模糊效果", configItem: "themeImageBlur", attachTo: "themeImage"},
 		{type: "title", text: "播放界面"},
 		{type: "boolean", text: "背景动态混色", description: "关闭后可减少播放页对硬件资源的占用。", configItem: "backgroundBlur"},
 		{type: "boolean", text: "3D 特效", badges: ["experimental"], description: "在播放页的歌曲信息、播放列表与歌词视图使用 3D 视觉效果。", configItem: "3dEffect"},
