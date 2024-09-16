@@ -18,9 +18,6 @@
 			<i onclick="ipcRenderer.invoke('openDevtools')" id="devBtn" hidden title="开发者工具">&#xeb6d;</i>
 			<i onclick="WindowOps.toggleMini()" id="miniBtn" title="迷你模式">&#xeb14;</i>
 			<i onclick="WindowOps.toggleLyrics()" id="lyricsBtn" title="桌面歌词">词</i>
-			<i onclick="WindowOps.minimize()">&#xeaba;</i>
-			<i onclick="WindowOps.maximize()" id="maximizeBtn">&#xeab9;</i>
-			<i onclick="WindowOps.close()" id="closeBtn">&#xeab8;</i>
 		</header>
 
 
@@ -44,6 +41,7 @@
 					<div data-page-id="extensionPage" onclick="switchRightPage('extensionPage')"><i>&#xF450;</i> 扩展</div>
 					<div data-page-id="settingsPage" onclick="switchRightPage('settingsPage');SettingsPage.init()"><i>&#xF0EE;</i> 设置</div>
 					<div data-page-id="aboutPage" onclick="switchRightPage('aboutPage');initAboutPage()"><i>&#xEE59;</i> 关于</div>
+					<div data-page-id="updatePage" onclick="switchRightPage('updatePage');" hidden><i>&#xF24C;</i> 更新</div>
 				</div>
 			</div>
 			<!-- 右侧栏 -->
@@ -107,7 +105,7 @@
 					<div class="header">
 						<i>&#xEC5A;</i> 下载管理
 					</div>
-					<div id="downloadContainer"></div>
+					<div id="downloadContainer" class="container"></div>
 				</div>
 				<!-- 扩展页 -->
 				<div id="extensionPage" class="page" hidden>
@@ -115,12 +113,17 @@
 						<i>&#xF450;</i> 扩展程序
 						<small><i>&#xEC5A;</i>拖入扩展包以安装</small>
 					</div>
-					<div id="extensionContainer"></div>
+					<div id="extensionContainer" class="container">
+						<div class="block highlight" id="extReloadTip" hidden>
+							<section><div><i>&#xEE59;</i> 您的更改将在重载此应用后生效</div></section>
+							<button class="sub" onclick="ipcRenderer.invoke('restart')">重载应用</button>
+						</div>
+					</div>
 				</div>
 				<!-- 设置页 -->
 				<div id="settingsPage" class="page" hidden>
 					<div class="header"><i>&#xF0EE;</i> 软件设置</div>
-					<div id="settingsContainer"></div>
+					<div id="settingsContainer" class="container"></div>
 				</div>
 				<!-- 关于页 -->
 				<div id="aboutPage" hidden>
@@ -144,6 +147,7 @@
 							<a>the1812/flac-tagger</a>
 							<a>zhujin917/3sqrt7-context-menu</a>
 							<a>101arrowz/fflate</a>
+							<a>markedjs/marked</a>
 							<a>lokesh/color-thief</a>
 							<a>Remix-Design/RemixIcon</a>
 							<a>microsoft/vscode-codicons</a>
@@ -154,7 +158,7 @@
 								<img src="assets/misc/recommend-musictag.png">
 								<div><b>音乐标签</b><span>批量匹配歌曲元数据，可与本软件配合使用。</span></div>
 							</section>
-							<section data-href="https://vnisoft.top">
+							<section data-href="https://music.vnisoft.top">
 								<img src="assets/misc/recommend-vnimusic.png">
 								<div><b>维念音乐</b><span>老牌 PC 端本地音乐播放软件。</span></div>
 							</section>
@@ -162,6 +166,20 @@
 								<img src="assets/misc/recommend-salt.png">
 								<div><b>Salt Player</b><span>界面优雅的 Android 端本地音乐播放器。</span></div>
 							</section>
+						</div>
+					</div>
+				</div>
+				<!-- 更新页 -->
+				<div id="updatePage" class="page" hidden>
+					<div class="header">
+						<i>&#xF24C;</i> 版本更新
+						<small id="updateVersion"></small>
+					</div>
+					<div id="updateContainer" class="container">
+						<div id="updateInfo"></div>
+						<div class="operations">
+							<button class="sub" id="updateInfoBtn" onclick="webview(`https://github.com/${ghRepo}/releases/latest`, {width: 1100, height: 750})"><i>&#xEDCB;</i> 完整日志</button>
+							<button onclick="startUpdate()"><i>&#xEE68;</i> 立即更新</button>
 						</div>
 					</div>
 				</div>
@@ -178,9 +196,9 @@
 				</div>
 				<div class="center">
 					<div class="loopBtn" onclick="SimAPControls.toggleLoop()"><i></i></div>
-					<div class="larger" onclick="SimAPControls.prev()"><i>&#xF140;</i></div>
-					<div class="play" onclick="SimAPControls.togglePlay()"><i>&#xF508;</i><i>&#xF507;</i></div>
-					<div class="larger" onclick="SimAPControls.next()"><i>&#xF144;</i></div>
+					<div class="larger" onclick="SimAPControls.prev(true)"><i>&#xF140;</i></div>
+					<div class="play" onclick="SimAPControls.togglePlay(true)"><i>&#xF508;</i><i>&#xF507;</i></div>
+					<div class="larger" onclick="SimAPControls.next(true)"><i>&#xF144;</i></div>
 					<div onclick="SimAPControls.toggleList(1);PlayerController.loadMusicListActive();SimAPUI.show()" class="bottomListBtn"><i>&#xF011;</i></div>
 					<div onclick="WindowOps.toggleMini()" class="miniModeBtn"><i>&#xF0F4;</i></div>
 				</div>
@@ -202,7 +220,10 @@
 			<div class="playerContainer">
 				<div class="controls">
 					<img id="album" onerror="this.src='assets/placeholder.svg'">
-					<div class="musicInfo"><b>未在播放</b><div>未知艺术家</div></div>
+					<div class="infoBar">
+						<div class="musicInfo"><b>未在播放</b><div>未知艺术家</div></div>
+						<i onclick="PlayerController.showPlayerMenu()">&#xEF77;</i>
+					</div>
 					<div class="progressControl">
 						<span id="progressCurrent">0:00</span>
 						<div id="progressBar"></div>
@@ -211,9 +232,9 @@
 					<div class="buttons">
 						<div class="listBtn" onclick="SimAPControls.toggleList()"><i>&#xF011;</i></div>
 						<div class="loopBtn" onclick="SimAPControls.toggleLoop()"><i></i></div>
-						<div class="larger" onclick="SimAPControls.prev()"><i>&#xF140;</i></div>
-						<div class="play" onclick="SimAPControls.togglePlay()"><i>&#xF508;</i><i>&#xF507;</i></div>
-						<div class="larger" onclick="SimAPControls.next()"><i>&#xF144;</i></div>
+						<div class="larger" onclick="SimAPControls.prev(true)"><i>&#xF140;</i></div>
+						<div class="play" onclick="SimAPControls.togglePlay(true)"><i>&#xF508;</i><i>&#xF507;</i></div>
+						<div class="larger" onclick="SimAPControls.next(true)"><i>&#xF144;</i></div>
 						<div class="volBtn" onclick="SimAPControls.toggleVolume()"><i>&#xF2A2;</i><div id="volBar" min="0" max="1" value="1"></div></div>
 						<div class="lyricsBtn" onclick="SimAPControls.toggleLyrics()"><i>&#xF201;</i></div>
 					</div>
@@ -238,6 +259,7 @@
 		<script src="assets/components/SimAP.js"></script>
 		<script src="assets/components/SimLRC.js"></script>
 		<script src="assets/components/dialog.js"></script>
+		<script src="assets/components/marked.min.js"></script>
 		<script src="assets/main.js"></script>
 	</body>
 </html>

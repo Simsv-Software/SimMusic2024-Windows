@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="modal.css">
+		<link rel="stylesheet" href="SimProgress.css">
+		<style>
+			#text{opacity:.8;margin-bottom:10px;}
+		</style>
+	</head>
+	<body>
+		
+		<header>
+			<i onclick="window.close()" id="closeBtn">&#xeab8;</i>
+		</header>
+
+		<main>
+			<h1>版本更新</h1>
+			<div id="text"><i>&#xF337;</i> 正在连接下载源...</div>
+			<div id="progress" min="0" max="1"></div>
+		</main>
+
+		<!-- 引入脚本 -->
+		<script src="SimProgress.js"></script>
+		<script>
+			const {ipcRenderer} = require("electron");
+			const https = require("https");
+			const os = require("os");
+			const fs = require("fs");
+			const path = require("path");
+			const progressBar = new SimProgress(progress, {readOnly: true});
+			const queryParams = new URLSearchParams(window.location.search);
+			const downUrl = queryParams.get("downUrl");
+
+			function downloadFile(url, headers = {}, redirectCount = 0) {
+				return new Promise((resolve, reject) => {
+					const options = { ...headers, rejectUnauthorized: false};
+					https.get(url, options, (response) => {
+					if (response.statusCode >= 300 && response.statusCode < 400) {
+						const location = response.headers.location;
+						if (redirectCount < 10) {
+							downloadFile(location, headers, redirectCount + 1)
+							.then(resolve)
+							.catch(reject);
+						} else {
+							reject();
+						}
+					} else {
+						const totalBytes = parseInt(response.headers["content-length"], 10);
+						let receivedBytes = 0;
+						let startTime;
+						let speed;
+						const filePath = path.join(os.tmpdir(), "sim-music-update.simtemp");
+						const fileStream = fs.createWriteStream(filePath);
+						response.on("data", (chunk) => {
+							receivedBytes += chunk.length;
+							fileStream.write(chunk);
+							if (!startTime) startTime = Date.now();
+							const timeDiff = Date.now() - startTime;
+							if (timeDiff > 0) speed = receivedBytes / timeDiff * 1000;
+							text.innerHTML = (`<i>&#xEC5A;</i> ${humanSize(receivedBytes)} / ${humanSize(totalBytes)}`
+											  + `&nbsp;&nbsp;&nbsp;<i>&#xF371;</i> ${humanSize(speed)}/s`);
+							progressBar.setValue(receivedBytes / totalBytes);
+						});
+						response.on("end", () => {
+							fileStream.end();
+							resolve();
+						});
+						response.on("error", () => {
+							fileStream.end();
+							reject();
+						});
+					}
+					}).on("error", reject);
+				});
+			}
+			function humanSize(size) {
+				size = Number(size);
+				if (!size) return "--";
+				const units = ["B", "KB", "MB", "GB", "TB", "PB"];
+				let index = 0;
+				while (size >= 1024 && index < units.length - 1) { size /= 1024; index++; }
+				return size.toFixed(1) + units[index];
+			}
+
+			downloadFile(downUrl)
+			.then(() => {
+				text.innerHTML = (`<i>&#xEB7B;</i> 即将重启以完成更新`);
+				setTimeout(() => {ipcRenderer.invoke("appUpdate");}, 1000);
+			}).catch((error) => {
+				text.innerHTML = (`<i>&#xECA1;</i> 更新包下载失败`);
+			});
+		</script>
+	</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html style="opacity:0;">
+	<head>
+		<meta charset="UTF-8">
+		<title>SimMusicShutdownUI</title>
+		<style>
+			@font-face{font-family:"font";src:url("../font.ttf");}
+			body,html{margin:0;padding:0;height:100%;transition:opacity .3s;font-family:"font","微软雅黑";user-select:none;cursor:none;}
+			body{background:rgba(0,0,0,.9);overflow:hidden;}
+			#stars{position:fixed;animation:rotate 60s infinite linear;inset:0;margin:auto;width:100%;height:100%;}
+			.star{position:absolute;background:white;border-radius:50%;box-shadow:inset 0 0 5px white;animation:twinkle 1s infinite alternate;}
+			@keyframes twinkle{from{opacity:.2;transform:scale(0.5);}to{opacity:.5;transform:scale(1);}}
+			@keyframes rotate{to{transform:rotate(360deg);}}
+			#text{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;color:rgba(255,255,255,.8);font-size:1.5em;}
+			#text>b{font-size:1.5em;margin-bottom:10px;}
+		</style>
+	</head>
+	<body>
+		<div id="stars"></div>
+		<div id="text">
+			<b>设备将在 <span id="timer">60</span> 秒后<span id="operation"></span></b>
+			<span>按任意键可取消操作<span id="goodNight">。晚安，做个好梦~</span></span>
+		</div>
+		<script src="PublicConfig.js"></script>
+		<script>
+			// 读取配置信息
+			const operationType = config.getItem("sleepModeOperation");
+			operation.innerText = {shutdown: "关机", sleep: "休眠"}[operationType];
+			const intervalId = setInterval(() => {
+				timer.innerText --;
+				if (timer.innerText == "0") {
+					clearInterval(intervalId);
+					const {ipcRenderer} = require("electron");
+					ipcRenderer.invoke("cmd", `shutdown /${{shutdown: "s /hybrid /f /t 0", sleep: "h"}[operationType]}`);
+					window.close();
+				}
+			}, 990);
+			const hours = new Date().getHours();
+			goodNight.hidden = !(hours > 20 || hours < 6);
+			// 取消操作
+			onpointerdown = onkeydown = () => window.close();
+			// 初始化动效
+			for (let i = 0; i < 100; i++) {
+				const size = Math.random() * 3 + 2;
+				const x = Math.random() * window.innerWidth;
+				const y = Math.random() * window.innerHeight;
+				const duration = Math.random() * 7 + 3;
+				const star = document.createElement("div");
+				star.classList.add("star");
+				star.style.width = `${size}px`;
+				star.style.height = `${size}px`;
+				star.style.left = `${x}px`;
+				star.style.top = `${y}px`;
+				star.style.animationDuration = `${duration}s`;
+				stars.appendChild(star);
+			}
+			onload = () => {
+				document.documentElement.style = "";
+			}
+		</script>
+	</body>
+</html>

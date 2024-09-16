@@ -1,17 +1,25 @@
 
 class SimProgress {
-	constructor(element) {
+	constructor(element, options = {}) {
 		// 初始化
 		this.progressElement = element;
 		element.innerHTML = "<div><div></div></div>";
 		// 事件监听
-		if (!element.classList.contains("SimProgress")) {
+		if (options.readOnly) element.classList.add("readOnly");
+		if (options.vertical) element.classList.add("vertical");
+		if (!element.classList.contains("SimProgress") && !options.readOnly) {
 			// 拖动处理
 			const handleDrag = e => {
 				e.preventDefault();
 				if (!element.classList.contains("dragging")) return;
-				const clickX = (e.pageX || e.changedTouches[0].pageX || e.touches[0].pageX) - element.getBoundingClientRect().left;
-				const progress = Math.min(Math.max(clickX / element.clientWidth, 0), 1);
+				let progress;
+				if (options.vertical) {
+					const clickY = (e.pageY || e.changedTouches[0].pageY || e.touches[0].pageY) - element.getBoundingClientRect().top;
+					progress = 1 - Math.min(Math.max(clickY / element.clientHeight, 0), 1);
+				} else {
+					const clickX = (e.pageX || e.changedTouches[0].pageX || e.touches[0].pageX) - element.getBoundingClientRect().left;
+					progress = Math.min(Math.max(clickX / element.clientWidth, 0), 1);
+				}
 				element.style.setProperty("--SimProgressWidth", progress * 100 + "%");
 				this.value = this.min + (this.max - this.min) * progress;
 				if (this.ondrag) this.ondrag(this.value);
@@ -46,7 +54,8 @@ class SimProgress {
 		this.setValue(Number(element.getAttribute("value")) ?? this.min);
 	}
 	setValue(value = this.value) {
-		if (value > this.max || value < this.min) value = this.min;
+		if (value < this.min) value = this.min;
+		if (value > this.max) value = this.max;
 		if (this.progressElement.classList.contains("dragging")) return;
 		this.value = value;
 		this.progressElement.style.setProperty("--SimProgressWidth", (this.value - this.min) / (this.max - this.min) * 100 + "%");

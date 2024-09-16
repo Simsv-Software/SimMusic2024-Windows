@@ -1,4 +1,6 @@
 
+const defaultEq = [ { F: 70, G: 0, Q: 1 }, { F: 180, G: 0, Q: 1 }, { F: 320, G: 0, Q: 1 }, { F: 600, G: 0, Q: 1 }, { F: 1000, G: 0, Q: 1 }, { F: 3000, G: 0, Q: 1 }, { F: 6000, G: 0, Q: 1 }, { F: 12000, G: 0, Q: 1 }, { F: 14000, G: 0, Q: 1 }, { F: 16000, G: 0, Q: 1 } ];
+
 const defaultConfig = {
 	musicLists: {},
 	playList: [],
@@ -6,11 +8,18 @@ const defaultConfig = {
 	volume: .8,
 	loop: 0,
 	lrcShow: true,
+	updatePrefix: "",
+	albumScale: true,
 	musicFormats: ".mp3 .wav .flac",
 	showLocator: true,
 	themeImageType: "cover",
 	backgroundBlur: true,
 	audioFade: true,
+	eqProfile: "basic",
+	eqConfBasic: defaultEq,
+	eqConfPro: defaultEq,
+	sleepModePlayEnd: true,
+	sleepModeOperation: "none",
 	lyricBlur: true,
 	lyricAlign: "left",
 	lyricSize: 1.5,
@@ -29,9 +38,14 @@ const defaultConfig = {
 	desktopLyricsTop: screen.height - 300,
 	desktopLyricsLeft: screen.width / 2,
 	ext: {},
+	extPerms: {},
 	musicListSort: [1, 1],
 	parallelDownload: 3,
 	downloadFileName: "[title] - [artist]",
+	downloadMetadataTitle: true,
+	downloadMetadataArtist: true,
+	downloadMetadataCover: true,
+	downloadMetadataLyrics: 1,
 }
 
 const configListeners = {};

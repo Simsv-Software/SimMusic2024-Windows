@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="webview.css">
+	</head>
+	<body>
+		
+
+		<!-- 主体内容 -->
+
+		<header>
+			<div id="title">SimMusic</div>
+			<i onclick="openInBrowser()" style="padding-top:1px">&#xeb01;</i>
+			<i onclick="cancelDialog()" id="closeBtn">&#xeab8;</i>
+		</header>
+
+		<div id="progressBar"></div>
+
+		<webview src="about:blank" allowpopups></webview>
+
+		<div class="buttons">
+			<button class="sub" onclick="cancelDialog()">取消</button>
+			<button onclick="dialogSubmit()"><i>&#xEB7B;</i> 完成</button>
+		</div>
+		
+
+		<!-- 引入脚本 -->
+		<script>
+			const {ipcRenderer, shell} = require("electron");
+			const queryParams = new URLSearchParams(window.location.search);
+			const webview = document.querySelector("webview");
+			let currentURL;
+			let interval;
+			webview.setAttribute("partition", "dialog-" + queryParams.get("dialogId"));
+			if (queryParams.get("showFinishBtn") == "true") {
+				document.body.classList.add("showBtn");
+			}
+			let isFirstRun = true;
+			webview.addEventListener("dom-ready", () => {
+				webview.executeJavaScript(`window.alert = window.prompt = window.confirm = () => {return null};`);
+				webview.setAudioMuted(true);
+				if (isFirstRun) {
+					isFirstRun = false;
+					webview.setUserAgent(`Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${Math.floor(Math.random() * (130 - 110 + 1)) + 110}.0.0.0 Safari/537.36`);
+					webview.loadURL(queryParams.get("url"));
+					ipcRenderer.invoke("webviewDialogLoaded", webview.getWebContentsId());
+				}
+			});
+			webview.addEventListener("did-start-loading", () => {
+				title.textContent = "正在载入...";
+				progressBar.style.width = "5vw";
+				progressBar.classList.remove("finished");
+				clearInterval(interval);
+				interval = setInterval(() => {
+					progressBar.style.width = Math.min(95, (parseInt(progressBar.style.width) ? parseInt(progressBar.style.width) : 0) + 5) + "vw";
+				}, 500);
+			});
+			webview.addEventListener("did-stop-loading", () => {
+				title.textContent = webview.getTitle();
+				currentURL = webview.getURL();
+				clearInterval(interval);
+				progressBar.classList.add("finished");
+			});
+			webview.addEventListener("did-fail-load", () => {
+				webview.loadURL("data:text/html;base64,PGh0bWw+CiAgICA8aGVhZD4KICAgICAgICA8bWV0YSBjaGFyc2V0PSJ1dGYtOCI+CiAgICAgICAgPHRpdGxlPumUmeivrzwvdGl0bGU+CiAgICA8L2hlYWQ+CiAgICA8Ym9keT4KICAgICAgICA8c3R5bGU+CiAgICAgICAgICAgIGJvZHl7dGV4dC1hbGlnbjpjZW50ZXI7YmFja2dyb3VuZDojRjlGOUZCO30KICAgICAgICAgICAgaDF7bWFyZ2luOmNhbGMoNTB2aCAtIDEwMHB4KSAwIDAgMDt9CiAgICAgICAgICAgIHB7bWFyZ2luOjEwcHggMCAwIDA7Zm9udC1zaXplOjEuMnJlbTt9CiAgICAgICAgICAgIGRpdntvcGFjaXR5Oi44O21hcmdpbi10b3A6Y2FsYyg1MHZoIC0gNTBweCk7fQogICAgICAgIDwvc3R5bGU+CiAgICAgICAgPGgxPuWHuueOsOmUmeivrzwvaDE+CiAgICAgICAgPHA+5b6I5oqx5q2J77yM6aG16Z2i5Yqg6L295aSx6LSlPC9wPgogICAgICAgIDxkaXY+U2ltTXVzaWM8L2Rpdj4KICAgIDwvYm9keT4KPC9odG1sPg==");
+			});
+			function cancelDialog() {
+				ipcRenderer.invoke("dialogCancel", queryParams.get("parent"));
+				window.close();
+			}
+			function dialogSubmit() {
+				ipcRenderer.invoke("dialogSubmit", queryParams.get("parent"), queryParams.get("dialogId"), currentURL);
+				window.close();
+			}
+			function openInBrowser() {
+				shell.openExternal(currentURL);
+			}
+		</script>
+	</body>
+</html>

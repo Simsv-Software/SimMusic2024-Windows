@@ -5,9 +5,15 @@
 /* 音频控件 */
 .controls{display:flex;flex-direction:column;width:350px;position:absolute;inset:0;height:fit-content;margin:auto 0;transition:margin .3s,transform .3s;z-index:5;}
 .hideLyrics.hideList .controls{margin:auto calc(50% - 175px);transform:scale(1.05);}
-.controls #album{width:calc(100% + 10px);aspect-ratio:1;object-fit:cover;border-radius:10px;box-shadow:0 20px 25px -5px rgba(0,0,0,.1),0 8px 10px -6px rgba(0,0,0,.1);background:white;margin:-5px;}
+.controls #album{width:calc(100% + 10px);aspect-ratio:1;object-fit:cover;border-radius:10px;box-shadow:0 20px 25px -5px rgba(0,0,0,.1),0 8px 10px -6px rgba(0,0,0,.1);background:white;margin:-5px;transition:transform .4s;transition-timing-function:cubic-bezier(0.3, 0.7, 0, 1.8);}
+body.albumScale:not(.playing) .controls #album{transform:scale(.95);}
 /* 专辑信息 */
-.controls .musicInfo{margin:30px 0 10px 0;}
+.controls .infoBar{display:flex;align-items:center;margin:30px 0 10px 0;}
+.controls .infoBar i{display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.025);color:rgba(0,0,0,.6);font-size:1.1em;border-radius:15px;width:30px;height:30px;transition:all .2s,font-size 0s;}
+.controls .infoBar i:hover{background:rgba(0,0,0,.05);color:rgba(0,0,0,.8);}
+.controls .infoBar i:active{background:rgba(0,0,0,.05);color:rgba(0,0,0,.8);transform:scale(.95);}
+.sleepMode .controls .infoBar i{width:70px;font-size:.9em;font-family:"font";}
+.controls .musicInfo{width:calc(100% - 30px)!important;}
 .controls .musicInfo b,.controls .musicInfo div,.musicInfoBottom b,.musicInfoBottom>div{display:block;font-size:1.3em;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
 .controls .musicInfo div,.musicInfoBottom>div{font-size:.9em;opacity:.8;}
 /* 进度条 */

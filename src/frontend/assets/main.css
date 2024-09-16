@@ -2,8 +2,8 @@
 @font-face{font-family:"icon";src:url("icon.woff2");}
 @font-face{font-family:"windowsicon";src:url("windowsicon.ttf");}
 @font-face{font-family:"font";src:url("font.ttf");}
-html{font-size:16px;user-select:none;font-family:"font","微软雅黑";}
-body{margin:0;}
+html{font-size:16px;font-family:"font","微软雅黑";}
+body{margin:0;user-select:none;}
 body:not(.appLoading){background:#F9F9FB;}
 i{font-family:"icon";font-style:normal;}
 img{pointer-events:none;}
@@ -41,20 +41,19 @@ body:not(.appLoading) .loadingSplash{opacity:0;pointer-events:none;}
 
 
 /* 主窗体 - 顶栏图标 */
-header{position:fixed;top:0;height:35px;display:flex;justify-content:right;width:100%;z-index:100;-webkit-app-region:drag;}
-header i{font-family:"windowsicon";height:100%;width:40px;display:flex;align-items:center;justify-content:center;transition:background .2s,opacity .2s,color .2s;-webkit-app-region:no-drag;}
+header{position:fixed;top:0;height:35px;display:flex;justify-content:right;width:calc(100% - 138px);z-index:100;-webkit-app-region:drag;font-size:.95em;}
+header i{font-family:"windowsicon";height:100%;width:46px;display:flex;align-items:center;justify-content:center;transition:background .2s,opacity .2s,color .2s;padding-bottom:1px;-webkit-app-region:no-drag;}
 header i#lyricsBtn{font-size:.95em;padding-bottom:1px;font-family:"微软雅黑"!important;}
 header i#miniBtn{transform:scaleY(-1);font-size:.95em;}
-header i#devBtn{font-size:.95em;}
-header i:hover{background:rgba(0,0,0,.05);}
-header i:active{background:rgba(0,0,0,.1);opacity:.8;}
+header i#devBtn{padding-top:2px;}
+header i:hover{background:rgba(0,0,0,.07);}
+header i:active{background:rgba(0,0,0,.2);opacity:.8;}
 header i#closeBtn:hover{background:#E81123;color:white;}
 header i#closeBtn:active{background:#E81123;color:rgba(252,252,252,.8);}
 header i.active{color:#1E9FFF;}
-.playerShown #miniBtn,.playerShown #lyricsBtn,.playerShown #devBtn{opacity:0;pointer-events:none;}
-header #hidePlayerBtn{opacity:0;position:absolute;right:120px;pointer-events:none;}
-.playerShown header #hidePlayerBtn{opacity:1;pointer-events:all;}
-
+.playerShown #miniBtn,.playerShown #lyricsBtn,.playerShown #devBtn{display:none;}
+body:not(.playerShown) #hidePlayerBtn{display:none;}
+.fullscreen header{display:none;}
 
 
 
@@ -73,12 +72,13 @@ header #hidePlayerBtn{opacity:0;position:absolute;right:120px;pointer-events:non
 .left .leftBar .title i{transition:background .2s;padding:2px;border-radius:5px;}
 .left .leftBar .title i:hover{background:rgba(0,0,0,.1);}
 .left .leftBar .title i:active{background:rgba(0,0,0,.2);}
-.left .leftBar div{text-align:left;padding:5px 10px;border-radius:5px;transition:color .15s, background .2s;position:relative;}
+.left .leftBar div{text-align:left;padding:4.5px 10px;height:30px;border-radius:5px;transition:all .2s,color .1s;position:relative;}
 .left .leftBar div:hover{background:rgba(0,0,0,.05);}
 .left .leftBar div:active{background:rgba(0,0,0,.1);}
 .left .leftBar div.active{color:white;background:transparent;}
 .left .leftBar div::before{content:"";background:linear-gradient(90deg,#1E9FFF,#1E9FFFBB);opacity:0;transition:opacity .2s;position:absolute;inset:0;z-index:-1;}
 .left .leftBar div.active::before{opacity:1;}
+.left .leftBar div[hidden]{display:block!important;pointer-events:none;transform:translateX(-100px) translateY(-4.5px);padding:0 10px;height:0;opacity:0;}
 
 
 
@@ -153,30 +153,34 @@ body:not(.disableHighlight) .right #musicListContainer .tableContainer table td>
 .right #downloadContainer>div:not([data-status="download"])>.progressBar{opacity:0;}
 /* 扩展 */
 .right #extensionContainer{padding-top:90px!important;}
+.right #extensionContainer .block>div{white-space:nowrap;display:flex;zoom:.9;align-items:center;margin-right:15px;}
+.right #extensionContainer .block>div>span{margin-left:5px;}
 /* 设置 */
 .right .page .header{padding:30px 30px 10px 30px;font-size:1.5em;border-bottom:1px solid rgba(0,0,0,.05);position:absolute;background:rgba(252,252,252,.9);backdrop-filter:blur(20px);width:100%;z-index:2;display:flex;align-items:center;}
 .right .page .header i{margin-right:5px;}
 .right .page .header small{font-size:.6em;margin-left:15px;opacity:.8;}
-.right #settingsPage #settingsContainer, .right #extensionContainer, .right #downloadContainer{position:absolute;z-index:1;padding:70px 27.5px 100px 27.5px;width:100%;height:100%;overflow-y:scroll;}
-.right #settingsPage #settingsContainer .title{font-weight:bold;margin:20px 2.5px 5px 2.5px;}
-.right #settingsPage #settingsContainer .block, .right #extensionPage #extensionContainer>div{background:white;width:100%;border-radius:5px;margin-bottom:5px;padding:10px 15px;display:flex;align-items:center;}
-.right #settingsPage #settingsContainer .block{transform-origin:bottom;transition:margin-top .2s,opacity .2s,transform .2s;}
-.right #settingsPage #settingsContainer .block.folded{margin-top:calc(-5px - var(--height));opacity:0;pointer-events:none;transform:scaleY(0);}
-.right #settingsPage #settingsContainer .block section, .right #extensionPage #extensionContainer>div section{width:100%;margin-right:10px;}
-.right #settingsPage #settingsContainer .block section div, .right #extensionPage #extensionContainer>div section div{font-size:1em;}
-.right #settingsPage #settingsContainer .block section div badge{font-size:.8em;background:rgba(0,0,0,.1);opacity:.5;padding:0 7px;margin-left:5px;margin-top:2px;vertical-align:top;border-radius:10px;display:inline-block;}
-.right #settingsPage #settingsContainer .block section span, .right #extensionPage #extensionContainer>div section span{display:block;font-size:.9em;opacity:.8;word-break:break-all;line-height:1.1em;margin-top:3px;}
-.right #settingsPage #settingsContainer .block button, .right #extensionPage #extensionContainer button{white-space:nowrap;}
-.right #settingsPage #settingsContainer .block .toggle{display:inline-block;height:20px;min-width:35px;max-width:35px;padding:2px;background:rgba(0,0,0,.05);border-radius:10px;vertical-align:middle;transition:background .2s;}
-.right #settingsPage #settingsContainer .block .toggle::before{transition:margin-left .2s,transform .2s;transform:scale(.7);width:16px;height:16px;background:white;border-radius:50%;content:"";display:block;}
-.right #settingsPage #settingsContainer .block.on .toggle{background:#1E9FFF;}
-.right #settingsPage #settingsContainer .block.on .toggle::before{margin-left:15px;transform:scale(.9);}
-.right #settingsPage #settingsContainer .block .range{min-width:150px;max-width:150px;}
-.right #settingsPage #settingsContainer .block .range>div{background:rgba(0,0,0,.05);}
-.right #settingsPage #settingsContainer .block input,.right #settingsPage #settingsContainer .block select{min-width:150px;max-width:150px;}
-.right #settingsPage #settingsContainer .block .colorInput{background:rgba(0,0,0,.03);position:relative;border-radius:5px;}
-.right #settingsPage #settingsContainer .block .colorInput>input{opacity:0;}
-.right #settingsPage #settingsContainer .block .colorInput>span{position:absolute;inset:0;height:fit-content;margin:auto;text-align:center;text-transform:uppercase;}
+.right .page .container{position:absolute;z-index:1;padding:70px 27.5px 100px 27.5px;width:100%;height:100%;overflow-y:scroll;}
+.right .page .title{font-weight:bold;margin:20px 2.5px 5px 2.5px;}
+.right .page .block{background:white;width:100%;border-radius:5px;margin-bottom:5px;padding:10px 15px;display:flex;align-items:center;}
+.right .page .block.highlight{background:#1E9FFF;color:white;}
+.right .page .block{transform-origin:bottom;transition:margin-top .2s,opacity .2s,transform .2s;}
+.right .page .block.folded{margin-top:calc(-5px - var(--height));opacity:0;pointer-events:none;transform:scaleY(0);}
+.right .page .block section{width:100%;margin-right:10px;}
+.right .page .block section div{font-size:1em;}
+.right .page .block section div badge{font-size:.8em;background:rgba(0,0,0,.1);opacity:.5;padding:0 7px;margin-left:5px;margin-top:2px;vertical-align:top;border-radius:10px;display:inline-block;}
+.right .page .block section span{display:block;font-size:.9em;opacity:.8;word-break:break-all;line-height:1.1em;margin-top:3px;}
+.right .page .block button{white-space:nowrap;}
+.right .page .block.highlight button{background:white!important;color:#1E9FFF;}
+.right .page .block .range{min-width:150px;max-width:150px;}
+.right .page .block .range>div{background:rgba(0,0,0,.05);}
+.right .page .block input,.right .page .block select{min-width:150px;max-width:150px;}
+.right .page .block .colorInput{background:rgba(0,0,0,.03);position:relative;border-radius:5px;}
+.right .page .block .colorInput>input{opacity:0;}
+.right .page .block .colorInput>span{position:absolute;inset:0;height:fit-content;margin:auto;text-align:center;text-transform:uppercase;}
+.toggle{display:inline-block;height:20px;min-width:35px;max-width:35px;padding:2px;background:rgba(0,0,0,.05);border-radius:10px;vertical-align:middle;transition:background .2s;}
+.toggle::before{transition:margin-left .2s,transform .2s;transform:scale(.7);width:16px;height:16px;background:white;border-radius:50%;content:"";display:block;}
+.on .toggle{background:#1E9FFF;}
+.on .toggle::before{margin-left:15px;transform:scale(.9);}
 /* 关于 */
 .right #aboutPage{padding:30px;overflow-y:scroll;}
 .right #aboutPage .top{display:flex;align-items:center;}
@@ -197,7 +201,18 @@ body:not(.disableHighlight) .right #musicListContainer .tableContainer table td>
 .right #aboutPage .main>div section>div{margin-left:10px;}
 .right #aboutPage .main>div section>div>b{display:block;font-size:1.2em;}
 .right #aboutPage .main>div section>div>span{font-size:.9em;opacity:.8;display:block;margin-bottom:5px;}
-
+/* 更新 */
+.right #updateContainer{padding-top:90px!important;}
+.right #updateInfo{background:white;margin:0 -2.5px;padding:5px 20px 15px 20px;}
+.right #updateInfo p{margin:3px 5px;}
+.right #updateInfo h1,.right #updateInfo h2,.right #updateInfo h3{margin:15px 5px 5px 5px;zoom:.9;}
+.right #updateInfo h1{border-bottom:1px solid rgba(0,0,0,.05);padding-bottom:5px;}
+.right #updateInfo ul,.right #updateInfo ol{margin:0;padding-left:23px;}
+.right #updateInfo blockquote{background:rgba(0,0,0,.025);margin:5px 0;padding:7px 10px;border-radius:10px;}
+.right #updateInfo blockquote p{margin:3px 0;}
+.right #updateInfo img{margin-top:5px;background:white;border-radius:5px;width:100%;display:block;}
+.right #updateInfo code{font-family:"Source Code Pro", "Consolas", "font";}
+.right .operations{margin:0 -2.5px;padding-top:10px;text-align:right;}
 
 
 /* 主窗体 - 文件拖入 */
@@ -210,6 +225,7 @@ body:not(.disableHighlight) .right #musicListContainer .tableContainer table td>
 /* 主窗体 - 主题图片 */
 #themeImage{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;opacity:.05;z-index:40;transition:opacity .2s;}
 body:not(.themeImage) #themeImage{opacity:0;}
+.themeImage .right #rightPlaceholder img{display:none;}
 .themeImage #bottom,.themeImage .musicListTitle,.themeImage .right .page .header,.themeImage .musicLocator{background:rgba(255,255,255,.9);}
 
 
@@ -242,8 +258,27 @@ body:not(.miniModeStatus) .bottom .info .musicInfoBottom>div #miniModeStatus{tra
 
 
 /* 主窗体 - 播放内页 */
-#playPage{position:fixed;top:120vh;left:0;width:100%;height:100%;background:white;transition:top .3s;overflow:hidden;user-select:none;z-index:50;}
+#playPage{position:fixed;top:120vh;left:0;width:100%;height:100%;background:white;transition:top .3s;overflow:hidden;z-index:50;}
 .playerShown #playPage{top:0;}
+.darkPlayer{--SimAPTheme:rgba(255,255,255,.8)!important;}
+.darkPlayer #playPage{background:black;color:rgba(255,255,255,.9);}
+.darkPlayer #playPage b,.darkPlayer .lyrics>div>div.active{font-weight:normal;}
+.darkPlayer #playPage .SimProgress{--SimProgressBackground:rgba(255,255,255,.1);}
+.darkPlayer #playPage .SimProgress::after{background:white;}
+.darkPlayer #playPage .SimLRC{--normalColor:rgba(255,255,255,.2)!important;}
+.darkPlayer #playPage #background{opacity:.35;}
+.darkPlayer #playPage #background canvas{opacity:.5;}
+.darkPlayer.playerShown header i{color:rgba(255,255,255,.8);}
+.darkPlayer .controls #album,.list>div>img{background:rgba(0,0,0,.1);}
+.darkPlayer .controls .infoBar i{background:rgba(255,255,255,.025);color:rgba(255,255,255,.6);}
+.darkPlayer .controls .infoBar i:hover,.darkPlayer .controls .infoBar i:active{background:rgba(255,255,255,.05);color:rgba(255,255,255,.8);}
+.darkPlayer .controls .buttons>div:hover,.darkPlayer .controls .buttons>div:active{background:rgba(255,255,255,.05);}
+.darkPlayer.musicLoading #progressBar>div{background-image:linear-gradient(-45deg,rgba(255,255,255,.05) 25%,transparent 0,transparent 50%,rgba(255,255,255,.05) 0,rgba(255,255,255,.05) 75%,transparent 0,transparent)!important;}
+.darkPlayer.volume .controls .buttons>.volBtn{background:rgba(255,255,255,.05)!important;color:rgba(255,255,255,.8);}
+.darkPlayer .list>div:hover{background:rgba(255,255,255,.025);}
+.darkPlayer .list>div.active,.darkPlayer .list>div:active{background:rgba(255,255,255,.05);}
+.darkPlayer.playerShown header i:hover{background:rgba(255,255,255,.05);}
+
 
 
 /* 主窗体 - 迷你模式 */

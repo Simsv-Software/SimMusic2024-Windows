@@ -1,8 +1,11 @@
 
 .SimProgress{--SimProgressBackground:rgba(0,0,0,.1);--SimProgressTheme:#1E9FFF;}
 .SimProgress{display:block;position:relative;height:7px;width:100%;--SimProgressWidth:0%;}
-.SimProgress::after{background:var(--SimProgressTheme);border-radius:50%;height:11px;width:11px;position:absolute;top:0;bottom:0;margin:auto;left:calc(var(--SimProgressWidth) - 5px);content:"";transition:left .2s;box-shadow:0 0 5px 0 rgba(0,0,0,.2);}
-.SimProgress.dragging::after{transition:none;}
+.SimProgress.vertical{height:100%;width:7px;}
+.SimProgress:not(.readOnly)::after{background:var(--SimProgressTheme);border-radius:50%;height:11px;width:11px;position:absolute;top:0;bottom:0;margin:auto;left:calc(var(--SimProgressWidth) - 5px);content:"";transition:left .2s;box-shadow:0 0 5px 0 rgba(0,0,0,.2);}
+.SimProgress.SimProgress.vertical::after{position:absolute;bottom:calc(var(--SimProgressWidth) - 5px);left:0;margin-left:-2px;top:unset;transition:bottom .2s;}
+.SimProgress.dragging::after{transition:none!important;}
 .SimProgress>div{position:absolute;height:100%;width:100%;background:var(--SimProgressBackground);border-radius:3.5px;overflow:hidden;}
 .SimProgress>div>div{position:absolute;background:var(--SimProgressTheme);height:100%;left:0;bottom:0;transition:width .2s;width:var(--SimProgressWidth);}
+.SimProgress.vertical>div>div{height:var(--SimProgressWidth);left:0;right:0;bottom:0;transition:height .2s;width:100%;}
 .SimProgress.dragging>div>div{transition:none;}

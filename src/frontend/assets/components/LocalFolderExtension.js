@@ -46,7 +46,7 @@ const FileExtensionTools = {
 	  	return `${formattedMinutes}:${formattedSeconds}.${formattedMilliseconds}`;
 	},
 	fileMenuItem: [
-		{type: ["single"], content: { label: "在资源管理器显示", click() {shell.showItemInFolder(getCurrentSelected()[0])} }}
+		{type: ["single"], content: { label: "在资源管理器显示", icon: "ED8A", click() {shell.showItemInFolder(getCurrentSelected()[0])} }}
 	]
 }
 
@@ -91,14 +91,14 @@ ExtensionConfig.file.musicList = {
 			// 创建右键菜单，具体使用方法参考 zhujin917/3sqrt7-context-menu/README.md
 			element.oncontextmenu = event => {
 				new ContextMenu([
-					{ label: "查看歌曲", click() {element.click();} },
-					{ label: "在资源管理器中显示", click() {shell.openPath(name);} },
+					{ label: "查看歌曲", icon: "ECB5", click() {element.click();} },
+					{ label: "在资源管理器中显示", icon: "ED8A", click() {shell.openPath(name);} },
 					{ type: "separator" },
-					{ label: "添加到歌单", submenu: MusicList.getMenuItems(listName => {
+					{ label: "添加到歌单", icon: "EE0D", submenu: MusicList.getMenuItems(listName => {
 						MusicList.importToMusicList(listName, FileExtensionTools.scanMusic(name));
 						MusicList.switchList(listName, true);
 					}) },
-					{ label: "从列表中移除", click() {
+					{ label: "从列表中移除", icon: "ED74", click() {
 						confirm(`目录「${folderName}」将从 SimMusic 目录列表中移除，但不会从文件系统中删除。是否继续？`, () => {
 							const lists = config.getItem("folderLists");
 							lists.splice(lists.indexOf(name), 1);
@@ -185,6 +185,7 @@ ExtensionConfig.file.player = {
 		file = file.replace("file:", "");
 		const lastDotIndex = file.lastIndexOf(".");
 		lrcPath = file.substring(0, lastDotIndex) + ".lrc";
+		if (!fs.existsSync(lrcPath)) return "";
 		try {return fs.readFileSync(lrcPath, "utf8");}
 		catch {
 			let id3Lyrics = "";
@@ -197,6 +198,14 @@ ExtensionConfig.file.player = {
 			return id3Lyrics;
 		}
 	},
+	// 这个函数用于在播放器菜单中插入内容
+	getPlayerMenu(file) {
+		return [{
+			label: "在资源管理器显示",
+			icon: "ED8A", 
+			click() {shell.showItemInFolder(file);}
+		}];
+	}
 };
 
 

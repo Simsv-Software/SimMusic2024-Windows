@@ -21,6 +21,13 @@
     color: #000;
     white-space: nowrap;
 }
+.context-menu .item::before {
+	font-family: 'icon';
+	width: 20px;
+	display: inline-block;
+	content: var(--icon);
+	color: rgba(0,0,0,.8);
+}
 .context-menu .item:hover, .context-menu .item-focused {
     background-color: rgba(0,0,0,.05);
 }

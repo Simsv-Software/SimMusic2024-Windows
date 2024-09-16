@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="modal.css">
+		<link rel="stylesheet" href="SimProgress.css">
+		<style>
+			#text{opacity:.8;margin-bottom:10px;}
+			select{position:fixed;left:140px;top:28px;width:80px;padding:5px;}
+			#bars{display:flex;align-items:center;width:100%;height:calc(100vh - 140px);margin-top:30px;}
+			#bars>div{width:100%;height:100%;display:flex;align-items:center;flex-direction:column;}
+			#bars>div>.text{margin-top:10px;font-size:.9em;text-align:center;line-height:1.1em;}
+			#bars>div>.text>.value{color:#1E9FFF;font-size:.9em;display:block;}
+			textarea{font-size:.8em;font-family:"Source Code Pro","Consolas",monospace;height:160px;background:black;color:white;tab-size:2;}
+			textarea::selection{background:white;color:black;}
+			#proText{width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:.9em;}
+		</style>
+	</head>
+	<body>
+		
+		<header>
+			<i onclick="window.close()" id="closeBtn">&#xeab8;</i>
+		</header>
+
+		<main>
+			<h1>均衡器</h1>
+			<select onchange="switchProfile(this.value)">
+				<option value="basic">基础</option>
+				<option value="pro">高级</option>
+			</select>
+			<div id="basic">
+				<div id="bars"></div>
+			</div>
+			<div id="pro" hidden>
+				<div id="proText"><i>&#xF045;</i> 您可在 GitHub Wiki 查看相关帮助信息</div>
+				<textarea oninput="saveProEq(this.value)"></textarea>
+			</div>
+		</main>
+
+		<!-- 引入脚本 -->
+		<script src="SimProgress.js"></script>
+		<script src="PublicConfig.js"></script>
+		<script>
+			const {ipcRenderer} = require("electron");
+			// 基础配置
+			function formatEqValue(num) {
+				num = num.toFixed(1);
+				return num.startsWith("-") ? num : "+" + num;
+			}
+			[70, 180, 320, 600, 1000, 3000, 6000, 12000, 14000, 16000].forEach(frequency => {
+				const div = document.createElement("div");
+				div.innerHTML = `
+					<div class="bar" min="-20" max="20"></div>
+					<div class="text">
+						${frequency < 1000 ? frequency : frequency.toString().substring(0, frequency.toString().length - 3) + "K"}
+						<span class="value"></span>
+					</div>
+				`;
+				const reloadUi = (dontSet) => {
+					const eqConf = config.getItem("eqConfBasic");
+					eqConf.forEach(item => {
+						if (item.F == frequency) {
+							div.querySelector(".value").textContent = formatEqValue(item.G);
+							if (!dontSet) progress.setValue(item.G);
+						}
+					});
+				};
+				const setValue = value => {
+					progress.setValue(value);
+					value = progress.value;
+					const eqConf = config.getItem("eqConfBasic");
+					eqConf.forEach(item => { if (item.F == frequency) item.G = value; });
+					config.setItem("eqConfBasic", eqConf);
+					reloadUi(true);
+					ipcRenderer.invoke("mainWinExec", "applyEq()");
+				};
+				const progress = new SimProgress(div.querySelector(".bar"), {vertical: true});
+				div.onwheel = e => setValue(progress.value - e.deltaY / 100);
+				progress.ondrag = setValue;
+				reloadUi();
+				bars.appendChild(div);
+			});
+			// 高级配置
+			function switchProfile(type = config.getItem("eqProfile")) {
+				config.setItem("eqProfile", type);
+				basic.hidden = !(type == "basic");
+				pro.hidden = !(type == "pro");
+				document.querySelector("select").value = type;
+				ipcRenderer.invoke("mainWinExec", "applyEq()");
+			}
+			function reloadProValue() {
+				const value = config.getItem("eqConfPro");
+				let string = "[";
+				value.forEach((item, index) => {
+					string += (index ? "," : "") + "\n  " + JSON.stringify(item).replaceAll(',"', ', "').replaceAll('":', '": ');
+				})
+				string += "\n]";
+				document.querySelector("textarea").value = string;
+			}
+			function saveProEq(value) {
+				try {
+					const json = JSON.parse(value);
+					if (!json.forEach) throw("均衡器配置须为数组形式");
+					json.forEach((item, index) => {
+						if (typeof item.F != "number" || typeof item.G != "number" || typeof item.Q != "number") throw(`数组中第 ${index} 项未包含完整的 F、G、Q 参数`);
+						if (item.F < 10) throw(`数组中第 ${index} 项频率参数需不小于 10`);
+						if (item.G < -20 || item.G > 20) throw(`数组中第 ${index} 项增益参数需在 [-20, 20] 间`);
+						if (item.Q < 0.0001 || item.Q > 1000) throw(`数组中第 ${index} 项 Q 值需在 [0.0001, 1000] 间`);
+					});
+					config.setItem("eqConfPro", json);
+					ipcRenderer.invoke("mainWinExec", "applyEq()");
+					proText.innerHTML = `<i>&#xEB7B;</i> 您的配置已成功保存并应用`;
+				} catch (err) {
+					proText.innerHTML = `<i>&#xF4C8;</i> ${err.toString().replace("SyntaxError", "语法错误").split("in JSON")[0]}`;
+				}
+			}
+			switchProfile(); reloadProValue();
+		</script>
+	</body>
+</html>

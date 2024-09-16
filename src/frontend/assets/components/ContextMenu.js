@@ -32,6 +32,7 @@ class ContextMenu {
                 d = document.createElement("div");
                 d.classList.add("item");
                 d.textContent = item.label;
+				d.style.setProperty("--icon", item.icon ? `'\\${item.icon}'` : "");
                 if (item.submenu) {
                     if (item.submenu.length == 0) {
                         item.submenu = [{

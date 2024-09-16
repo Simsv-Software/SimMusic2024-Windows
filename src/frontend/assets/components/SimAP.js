@@ -60,11 +60,13 @@ const SimAPTools = {
 // 初始化SimAP
 const switchMusic = (playConfig) => {
 	// 初始化界面
+	const audio = document.getElementById("audio");
 	document.getElementById("album").src = document.getElementById("albumBottom").src = playConfig.album;
 	document.querySelector(".musicInfo>b").textContent = document.querySelector(".musicInfoBottom>b").textContent = playConfig.title;
 	document.querySelector(".musicInfo>div").textContent = document.querySelector("#bottomArtist").textContent = playConfig.artist;
-	document.getElementById("audio").src = playConfig.audio;
-	document.getElementById("audio").currentTime = 0;
+	const lastPlaybackRate = audio.playbackRate;
+	audio.src = playConfig.audio;
+	audio.currentTime = 0;
 	document.body.classList.add("withCurrentMusic");
 	document.body.classList.add("musicLoading");
 	if (playConfig.play) setTimeout(() => {
@@ -75,21 +77,13 @@ const switchMusic = (playConfig) => {
 	document.title = playConfig.title + " - SimMusic";
 	loadThemeImage();
 	// 初始化背景
-	document.getElementById("album").onload = () => {
-		const themeColors = SimAPTools.getTopColors(document.getElementById("album"));
-		PlayerBackground.update(`rgb(${themeColors[0].join(",")})`, [
-								`rgb(${themeColors[1] ? themeColors[1].join(",") : "255,255,255"})`,
-								`rgb(${themeColors[2] ? themeColors[2].join(",") : "255,255,255"})`,
-								`rgb(${themeColors[3] ? themeColors[3].join(",") : "255,255,255"})` ]);
-		const themeColorNum = Math.min( 255 / (themeColors[0][0] + themeColors[0][1] + themeColors[0][2] + 1), 1);
-		document.body.style.setProperty("--SimAPTheme", `rgb(${themeColors[0].map(num => num * themeColorNum).join(",")})`);
-	}
+	document.getElementById("album").onload = SimAPUI.loadColors;
 	// 初始化音频控件
-	const audio = document.getElementById("audio");
 	const current = document.getElementById("progressCurrent");
 	const duration = document.getElementById("progressDuration");
 	audio.onloadedmetadata = () => {
 		document.body.classList.remove("musicLoading");
+		applyEq();
 		SimAPProgress.max = SimAPProgressBottom.max = audio.duration;
 		SimAPProgress.setValue(0); SimAPProgressBottom.setValue(0);
 		duration.textContent = SimAPTools.formatTime(audio.duration);
@@ -101,6 +95,8 @@ const switchMusic = (playConfig) => {
 			current.textContent = SimAPTools.formatTime(value);
 			setMiniModeStatus(`${SimAPTools.formatTime(value)} / ${duration.textContent}`);
 		}
+		loadVolumeUi();
+		audio.playbackRate = lastPlaybackRate ?? 1;
 		if (playConfig.play) audio.play(); else audio.pause();
 	};
 	audio.ontimeupdate = () => {
@@ -115,6 +111,7 @@ const switchMusic = (playConfig) => {
 		document.body.classList.add("musicLoading");
 	};
 	audio.onended = () => {
+		if (SleepMode.checkMusicSwitch()) return;
 		if (config.getItem("loop") == 1) { PlayerController.switchMusic(config.getItem("currentMusic"), false, true); }
 		else SimAPControls.next();
 	};
@@ -128,10 +125,10 @@ const switchMusic = (playConfig) => {
 	};
 	// 系统级控件
 	navigator.mediaSession.metadata = new MediaMetadata({ title: playConfig.title, artist: playConfig.artist, artwork: [{ src: playConfig.album }],	});
-	navigator.mediaSession.setActionHandler("play", SimAPControls.togglePlay);
-	navigator.mediaSession.setActionHandler("pause", SimAPControls.togglePlay);
-	navigator.mediaSession.setActionHandler("previoustrack", SimAPControls.prev);
-	navigator.mediaSession.setActionHandler("nexttrack", SimAPControls.next);
+	navigator.mediaSession.setActionHandler("play", () => {SimAPControls.togglePlay(true);});
+	navigator.mediaSession.setActionHandler("pause", () => {SimAPControls.togglePlay(true);});
+	navigator.mediaSession.setActionHandler("previoustrack", () => {SimAPControls.prev(true);});
+	navigator.mediaSession.setActionHandler("nexttrack", () => {SimAPControls.next(true);});
 	// 初始化歌词
 	const slrc = new SimLRC(playConfig.lyrics);
 	slrc.render(document.querySelector(".lyrics>div"), audio, {
@@ -219,7 +216,8 @@ const SimAPControls = {
 		navigator.mediaSession.playbackState = playing ? "playing" : "paused";
 		ipcRenderer.invoke(playing ? "musicPlay" : "musicPause");
 	},
-	togglePlay() {
+	togglePlay(isManual) {
+		if (isManual) SleepMode.checkManualOperation();
 		if (document.body.classList.contains("musicLoading")) return;
 		const audio = document.getElementById("audio");
 		const isPlay = audio.paused;
@@ -227,7 +225,7 @@ const SimAPControls = {
 		SimAPControls.loadAudioState();
 		clearInterval(SimAPControls.audioFadeInterval);
 		// 音频淡入淡出处理
-		if (config.getItem("audioFade") && audio.volume) {
+		if (config.getItem("audioFade") && config.getItem("volume")) {
 			const configVolume = config.getItem("volume");
 			const volumeOffset = configVolume / 10;
 			if (isPlay) audio.play();
@@ -252,13 +250,18 @@ const SimAPControls = {
 			audio[isPlay ? "play" : "pause"]();
 		}
 	},
-	prev() {
+	prev(isManual) {
+		if (isManual) SleepMode.checkManualOperation();
 		const audio = document.getElementById("audio");
 		if (!config.getItem("fastPlayback") || audio.currentTime / audio.duration < .9) SimAPControls.switchIndex(-1);
 		else audio.currentTime = 0;
 	},
-	next() {SimAPControls.switchIndex(1);},
+	next(isManual) {
+		if (isManual) SleepMode.checkManualOperation();
+		SimAPControls.switchIndex(1);
+	},
 	switchIndex(offset) {
+		if (SleepMode.checkMusicSwitch()) return;
 		const list = config.getItem("playList");
 		const currentPlayingIndex = list.indexOf(config.getItem("currentMusic"));
 		let newIndex = currentPlayingIndex + offset;
@@ -342,6 +345,7 @@ const SimAPUI = {
 		this.playingAnimation = true;
 		setTimeout(() => {
 			document.body.classList.add("playerShown");
+			if (config.getItem("darkPlayer")) ipcRenderer.invoke("overlayWhite");
 			const listActive = document.querySelector(".list div.active");
 			if (!listActive) document.querySelector(".list div").click();
 			document.querySelector(".list div.active").scrollIntoView({block: "center"});
@@ -354,7 +358,8 @@ const SimAPUI = {
 	hide() {
 		if (this.playingAnimation) return;
 		if (!document.body.classList.contains("playerShown")) return;
-		document.exitFullscreen().catch(() => {});
+		ipcRenderer.invoke("overlayBlack");
+		SimAPUI.toggleFullScreen(true);
 		document.body.classList.remove("playerShown");
 		this.playingAnimation = true;
 		setTimeout(() => {
@@ -367,8 +372,33 @@ const SimAPUI = {
 	toggleDesktopLyrics(_event, showWindow = document.visibilityState == "hidden" ? true : false) {
 		if (config.getItem("desktopLyricsAutoHide") && WindowStatus.lyricsWin) ipcRenderer.invoke("toggleLyrics", showWindow);
 	},
+	loadColors() {
+		const themeColors = SimAPTools.getTopColors(document.getElementById("album"));
+		PlayerBackground.update(`rgb(${themeColors[0].join(",")})`, [
+								`rgb(${themeColors[1] ? themeColors[1].join(",") : "255,255,255"})`,
+								`rgb(${themeColors[2] ? themeColors[2].join(",") : "255,255,255"})`,
+								`rgb(${themeColors[3] ? themeColors[3].join(",") : "255,255,255"})` ]);
+		const themeColorNum = Math.min( 255 / (themeColors[0][0] + themeColors[0][1] + themeColors[0][2] + 1), 1);
+		document.body.style.setProperty("--SimAPTheme", `rgb(${themeColors[0].map(num => num * themeColorNum).join(",")})`);
+		document.body.classList[config.getItem("darkPlayer") ? "add" : "remove"]("darkPlayer");
+	},
+	toggleFullScreen(isQuit) {
+		if (!document.fullscreenElement && document.body.classList.contains("playerShown") && !isQuit) {
+			document.body.requestFullscreen();
+			document.body.classList.add("fullscreen");
+			document.onfullscreenchange = () => {
+				if (!document.fullscreenElement) document.body.classList.remove("fullscreen");
+				window.dispatchEvent(new Event("resize"));
+			};
+		} else {
+			document.exitFullscreen().catch(() => {});
+			document.body.classList.remove("fullscreen");
+		}
+		window.dispatchEvent(new Event("resize"));
+	}
 }
 ipcRenderer.invoke("musicPause");
+config.listenChange("darkPlayer", SimAPUI.loadColors);
 
 
 // 处理键盘操作
@@ -382,13 +412,17 @@ document.documentElement.addEventListener("keydown", e => {
 	const duration = document.getElementById("progressDuration").textContent;
 	switch (e.key) {
 		case " ":
-			SimAPControls.togglePlay();
+			SimAPControls.togglePlay(true);
 			break;
 		case "ArrowUp":
-			config.setItem("volume", Math.min(1, config.getItem("volume") + .05));
+			const upVol = Math.min(1, config.getItem("volume") + .05);
+			config.setItem("volume", upVol);
+			setMiniModeStatus(`音量：${Math.round(upVol * 100)}%`);
 			break;
 		case "ArrowDown":
-			config.setItem("volume", Math.max(0, config.getItem("volume") - .05));
+			const downVol = Math.max(0, config.getItem("volume") - .05);
+			config.setItem("volume", downVol);
+			setMiniModeStatus(`音量：${Math.round(downVol * 100)}%`);
 			break;
 		case "ArrowRight":
 			const value1 = Math.min(audio.duration, audio.currentTime + 5);
@@ -404,9 +438,8 @@ document.documentElement.addEventListener("keydown", e => {
 			SimAPUI.hide();
 			document.body.classList.remove("volume");
 			break;
-		case "F11": 
-			if (!document.fullscreenElement && document.body.classList.contains("playerShown")) document.getElementById("playPage").requestFullscreen();
-			else document.exitFullscreen();
+		case "F11":
+			SimAPUI.toggleFullScreen();
 			break;
 	}
 });
@@ -421,17 +454,19 @@ const loadVolumeUi = () => {
 	SimAPVolume.setValue(value);
 	SimAPVolumeBottom.setValue(value);
 	SimAPControls.toggleMuted(false);
-	if (window.setMiniModeStatus) setMiniModeStatus(`音量：${Math.round(value * 100)}%`);
 }
 loadVolumeUi();
 config.listenChange("volume", loadVolumeUi);
 SimAPVolume.ondrag = SimAPVolumeBottom.ondrag = value => { config.setItem("volume", value); }
 document.body.onpointerdown = () => {document.body.classList.remove("volume");};
+addEventListener("blur", () => {document.body.classList.remove("volume");});
 document.querySelector(".volBtn").onpointerdown = e => {e.stopPropagation();};
 const handleWheel = e => {
 	e.preventDefault();
-	const value = config.getItem("volume");
-	config.setItem("volume", e.deltaY > 0 ? Math.max(0, value - .05) : Math.min(1, value + .05));
+	let value = config.getItem("volume");
+	value = e.deltaY > 0 ? Math.max(0, value - .05) : Math.min(1, value + .05);
+	config.setItem("volume", value);
+	setMiniModeStatus(`音量：${Math.round(value * 100)}%`);
 };
 document.addEventListener("wheel", e => { if (document.body.classList.contains("volume")) handleWheel(e); }, {passive: false});
 document.querySelector(".volBtn").onwheel = () => { document.body.classList.add("volume"); };
