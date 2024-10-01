@@ -1,7 +1,7 @@
 
 // © 2020 - 2024  Simsv Studio
 
-const {app, BrowserWindow, ipcMain, dialog, nativeImage, Tray, Menu, screen, session, webContents} = require("electron");
+const {app, BrowserWindow, ipcMain, dialog, nativeImage, Tray, Menu, screen, session, webContents, desktopCapturer} = require("electron");
 const {exec} = require("child_process");
 const path = require("path");
 const fs = require("fs");
@@ -85,6 +85,11 @@ app.whenReady().then(() => {
 			showMainWin();
 		}
 	});
+	session.defaultSession.setDisplayMediaRequestHandler((request, callback) => {
+		desktopCapturer.getSources({ types: ["screen"] }).then((sources) => {
+			callback({ video: sources[0], audio: "loopback" })
+		});
+	});
 });
 ipcMain.handle("mainWinLoaded", () => {
 	if (isMainWinLoaded) return [];
@@ -156,6 +161,8 @@ ipcMain.handle("webview", (_event, url, parent, dialogId, width, height, showFin
 		modal: true,
 		width: width ?? 600,
 		height: height ?? 500,
+		minWidth: 600,
+		minHeight: 500,
 		frame: false,
 		resizable: true,
 		show: false,

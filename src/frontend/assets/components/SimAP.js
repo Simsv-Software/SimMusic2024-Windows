@@ -220,6 +220,7 @@ const SimAPControls = {
 		if (isManual) SleepMode.checkManualOperation();
 		if (document.body.classList.contains("musicLoading")) return;
 		const audio = document.getElementById("audio");
+		if (!audio || !audio.src) return;
 		const isPlay = audio.paused;
 		document.body.classList[isPlay ? "add" : "remove"]("playing");
 		SimAPControls.loadAudioState();

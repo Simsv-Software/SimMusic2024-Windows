@@ -25,10 +25,10 @@
 		<script>
 			// 读取配置信息
 			const operationType = config.getItem("sleepModeOperation");
-			operation.innerText = {shutdown: "关机", sleep: "休眠"}[operationType];
+			operation.textContent = {shutdown: "关机", sleep: "休眠"}[operationType];
 			const intervalId = setInterval(() => {
-				timer.innerText --;
-				if (timer.innerText == "0") {
+				timer.textContent --;
+				if (timer.textContent == "0") {
 					clearInterval(intervalId);
 					const {ipcRenderer} = require("electron");
 					ipcRenderer.invoke("cmd", `shutdown /${{shutdown: "s /hybrid /f /t 0", sleep: "h"}[operationType]}`);

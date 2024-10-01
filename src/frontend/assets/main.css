@@ -254,7 +254,9 @@ body:not(.miniModeStatus) .bottom .info .musicInfoBottom>div #miniModeStatus{tra
 .bottom .center>div.play{width:55px;height:55px;}
 .bottom .volBtnBottom{width:150px;position:absolute;top:5px;bottom:0;right:30px;display:flex;align-items:center;}
 .bottom .volBtnBottom>div{opacity:.7;margin-right:5px;min-width:40px;height:40px;}
-
+.playBtnColor .bottom .center>.play{background:#1e9fff;color:white;font-size:1.6em;width:50px;height:50px;margin: 0 5px;}
+.playBtnColor .bottom .center>.play:hover,.playBtnColor .bottom .center>.play:active{filter:brightness(.95);}
+.playBtnColor .bottom .center>div{opacity:.5;}
 
 
 /* 主窗体 - 播放内页 */
@@ -269,7 +271,7 @@ body:not(.miniModeStatus) .bottom .info .musicInfoBottom>div #miniModeStatus{tra
 .darkPlayer #playPage #background{opacity:.35;}
 .darkPlayer #playPage #background canvas{opacity:.5;}
 .darkPlayer.playerShown header i{color:rgba(255,255,255,.8);}
-.darkPlayer .controls #album,.list>div>img{background:rgba(0,0,0,.1);}
+.darkPlayer .controls #album,.darkPlayer .list>div>img{background:rgba(0,0,0,.1);}
 .darkPlayer .controls .infoBar i{background:rgba(255,255,255,.025);color:rgba(255,255,255,.6);}
 .darkPlayer .controls .infoBar i:hover,.darkPlayer .controls .infoBar i:active{background:rgba(255,255,255,.05);color:rgba(255,255,255,.8);}
 .darkPlayer .controls .buttons>div:hover,.darkPlayer .controls .buttons>div:active{background:rgba(255,255,255,.05);}

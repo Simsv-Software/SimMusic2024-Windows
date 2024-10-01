@@ -41,9 +41,9 @@
     border-top: solid 1px rgb(0 0 0 / .05);
 }
 .context-menu .disabled {
-    color: rgb(0 0 0 / .5) !important;
+    color: black !important;
     background-color: transparent !important;
-    opacity: 1 !important;
+    opacity: .5 !important;
 }
 
 .context-menu .sub {

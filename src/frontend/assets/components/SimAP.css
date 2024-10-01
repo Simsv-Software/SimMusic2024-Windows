@@ -34,8 +34,6 @@ body.albumScale:not(.playing) .controls #album{transform:scale(.95);}
 .playing .controls .buttons>.play>i:first-child,.playing .bottom .center>.play>i:first-child{opacity:0;transform:scale(.4);}
 .playing .controls .buttons>.play>i:last-child,.playing .bottom .center>.play>i:last-child{opacity:1;transform:none;}
 .controls .buttons>.play i:first-child,.bottom .center>.play i:first-child{padding-left:3.5px;}
-.playBtnColor .controls .buttons{color:var(--SimAPTheme);}
-.playBtnColor .bottom .center>.play{color:#1E9FFF;}
 /* 音量控制 */
 .volume .controls .buttons>div{width:0;opacity:0!important;}
 .volume .controls .buttons>.volBtn{width:180px;color:rgba(0,0,0,.7);background:rgba(0,0,0,.05)!important;transform:none!important;opacity:1!important;mask:unset;border-radius:100px;}
