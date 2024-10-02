@@ -6,9 +6,9 @@
 2. 此 Repo 为 Windows 端仓库，Linux 用户请右转 [SimMusic2024-Linux](https://github.com/Simsv-Software/SimMusic2024-Linux) 使用官方的 Linux 适配版（ Special thanks to [@XIAYM-gh](https://github.com/XIAYM-gh) ）。
 
 ## 🔗 帮助文档
-- <a href="https://github.com/Simsv-Software/SimMusic2024/wiki/SimMusic-%E7%94%A8%E6%88%B7%E6%8C%87%E5%8D%97">📄 SimMusic 用户指南</a>
-- <a href="https://github.com/Simsv-Software/SimMusic2024/wiki/SimMusic-扩展索引">🧩 SimMusic 扩展索引</a>
-- <a href="https://github.com/Simsv-Software/SimMusic2024/wiki/SimMusic-%E5%BC%80%E5%8F%91%E8%80%85%E5%8F%82%E8%80%83">🧑‍💻 SimMusic 开发者参考</a>
+- <a href="https://docs.simsv.com/sim-music/user-guide.html">📄 SimMusic 用户指南</a>
+- <a href="https://docs.simsv.com/sim-music/ext-index.html">🧩 SimMusic 扩展索引</a>
+- <a href="https://docs.simsv.com/sim-music/dev-docs.html">🧑‍💻 SimMusic 开发者参考</a>
 
 ## ✨ 特色介绍
 ![Features](https://github.com/user-attachments/assets/2285413f-51d9-406f-a473-65eab79fa794)
