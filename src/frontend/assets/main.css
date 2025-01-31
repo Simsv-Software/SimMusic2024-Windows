@@ -1,7 +1,8 @@
 
 @font-face{font-family:"icon";src:url("icon.woff2");}
 @font-face{font-family:"windowsicon";src:url("windowsicon.ttf");}
-@font-face{font-family:"font";src:url("font.ttf");}
+@font-face{font-family:"font";font-weight:400;src:url("font.woff2");}
+@font-face{font-family:"font";font-weight:700;src:url("font-bold.woff2");}
 html{font-size:16px;font-family:"font","微软雅黑";}
 body{margin:0;user-select:none;}
 body:not(.appLoading){background:#F9F9FB;}
