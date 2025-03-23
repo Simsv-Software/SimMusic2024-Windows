@@ -1,4 +1,3 @@
-
 .playerContainer{position:absolute;inset:0;margin:20px max(calc(50vw - 500px), 90px);transition:transform .2s;}
 #playPage .SimProgress{--SimProgressTheme:var(--SimAPTheme)!important;}
 

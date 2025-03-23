@@ -2,11 +2,12 @@
 	"name": "sim-music",
 	"version": "1.0.0",
 	"description": "SimMusic",
-	"main": "main.js",
+	"main": "src/main.js",
 	"author": "Simsv Studio",
 	"dependencies": {
 		"fflate": "^0.8.2",
 		"flac-tagger": "^1.0.7",
+		"marked": "^15.0.7",
 		"music-metadata": "^7.14.0",
 		"node-id3": "^0.2.8"
 	},

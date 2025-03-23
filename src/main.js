@@ -168,7 +168,7 @@ const createDialogWindow = (parent, properties) => new BrowserWindow({
 
 ipcMain.handle("dialog", (_, type, txt, parent, dialogId) => {
 	const dialogWindow = createDialogWindow(parent, { width: 500, height: 200 });
-	dialogWindow.loadURL(path.join(__dirname, `frontend/assets/components/dialog.html?type=${type}&txt=${encodeURIComponent(txt)}&parent=${parent}&dialogId=${dialogId}`));
+	dialogWindow.loadURL(path.join(__dirname, `frontend/components/dialog.html?type=${type}&txt=${encodeURIComponent(txt)}&parent=${parent}&dialogId=${dialogId}`));
 	dialogWindow.once("ready-to-show", () => dialogWindow.show());
 });
 
@@ -200,9 +200,10 @@ ipcMain.handle("webview", (_, url, parent, dialogId, width, height, showFinishBt
 		height: height ?? 500,
 		minWidth: 600,
 		minHeight: 500,
+		webPreferences: { webSecurity: false, nodeIntegration: true, contextIsolation: false, webviewTag: true, devTools: false }
 	});
 
-	dialogWindow.loadURL(path.join(__dirname, `frontend/assets/components/webview.html?url=${encodeURIComponent(url)}&showFinishBtn=${showFinishBtn}&parent=${parent}&dialogId=${dialogId}`));
+	dialogWindow.loadURL(path.join(__dirname, `frontend/components/webview.html?url=${encodeURIComponent(url)}&showFinishBtn=${showFinishBtn}&parent=${parent}&dialogId=${dialogId}`));
 	dialogWindow.center();
 
 	dialogWindow.once("ready-to-show", () => dialogWindow.show());
@@ -218,7 +219,7 @@ ipcMain.handle("webviewDialogLoaded", (_, wcId) => {
 
 ipcMain.handle("modal", (_, url, height, parent) => {
 	const dialogWindow = createDialogWindow(parent, { width: 500, height });
-	dialogWindow.loadURL(path.join(__dirname, "frontend/assets/components/", url));
+	dialogWindow.loadURL(path.join(__dirname, "frontend/components/", url));
 	dialogWindow.once("ready-to-show", () => dialogWindow.show());
 });
 
@@ -445,7 +446,7 @@ ipcMain.handle("shutdownCountdown", () => {
 		modal: true,
 		webPreferences: { webSecurity: false, nodeIntegration: true, contextIsolation: false }
 	});
-	countdown.loadURL(path.join(__dirname, "frontend/assets/components/shutdown.html"));
+	countdown.loadURL(path.join(__dirname, "frontend/components/shutdown.html"));
 });
 
 ipcMain.handle("cmd", (_, cmd) => {

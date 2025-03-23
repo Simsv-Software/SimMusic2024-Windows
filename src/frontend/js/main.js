@@ -290,7 +290,7 @@ const ExtensionRuntime = {
 			}
 		}
 		extData["file"] = {
-			code: await (await fetch("assets/components/LocalFolderExtension.js")).text(),
+			code: await (await fetch("js/LocalFolderExtension.js")).text(),
 			uiName: "本地",
 			extName: "本地文件播放支持",
 			version: SimMusicVersion,

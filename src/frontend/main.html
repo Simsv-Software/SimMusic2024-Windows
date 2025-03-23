@@ -3,15 +3,14 @@
 	<head>
 		<title>SimMusic</title>
 		<meta charset="utf-8">
-		<link rel="stylesheet" href="assets/components/ContextMenu.css">
-		<link rel="stylesheet" href="assets/components/SimAP.css">
-		<link rel="stylesheet" href="assets/components/SimProgress.css">
-		<link rel="stylesheet" href="assets/components/SimLRC.css">
-		<link rel="stylesheet" href="assets/main.css">
+		<link rel="stylesheet" href="css/ContextMenu.css">
+		<link rel="stylesheet" href="css/SimAP.css">
+		<link rel="stylesheet" href="css/SimProgress.css">
+		<link rel="stylesheet" href="css/SimLRC.css">
+		<link rel="stylesheet" href="css/main.css">
 	</head>
+	
 	<body class="hideList appLoading">
-		
-
 		<!-- 顶部按钮 -->
 		<header>
 			<i onclick="SimAPUI.hide()" id="hidePlayerBtn" title="收起播放器">&#xeab4;</i>
@@ -44,6 +43,7 @@
 					<div data-page-id="updatePage" onclick="switchRightPage('updatePage');" hidden><i>&#xF24C;</i> 更新</div>
 				</div>
 			</div>
+
 			<!-- 右侧栏 -->
 			<div class="right">
 				<section id="leftBarResizer"></section>
@@ -100,6 +100,7 @@
 						<div class="musicListErrorOverlay" hidden><img src="assets/icon-error.svg"><div></div></div>
 					</div>
 				</div>
+
 				<!-- 下载页 -->
 				<div id="downloadPage" class="page" hidden>
 					<div class="header">
@@ -107,6 +108,7 @@
 					</div>
 					<div id="downloadContainer" class="container"></div>
 				</div>
+
 				<!-- 扩展页 -->
 				<div id="extensionPage" class="page" hidden>
 					<div class="header">
@@ -120,11 +122,13 @@
 						</div>
 					</div>
 				</div>
+
 				<!-- 设置页 -->
 				<div id="settingsPage" class="page" hidden>
 					<div class="header"><i>&#xF0EE;</i> 软件设置</div>
 					<div id="settingsContainer" class="container"></div>
 				</div>
+
 				<!-- 关于页 -->
 				<div id="aboutPage" hidden>
 					<div class="top">
@@ -169,6 +173,7 @@
 						</div>
 					</div>
 				</div>
+
 				<!-- 更新页 -->
 				<div id="updatePage" class="page" hidden>
 					<div class="header">
@@ -185,8 +190,10 @@
 				</div>
 			</div>
 			</div>
+
 			<!-- 拖入提示 -->
 			<div id="dropTipContainer"><div id="dropTip"><i>&#xEA11;</i> <span id="dropTipText"></span></div></div>
+
 			<!-- 播放条 -->
 			<div class="bottom">
 				<div id="bottomProgressBar"></div><div class="progressBefore"></div><div class="progressAfter"></div>
@@ -252,14 +259,13 @@
 		<audio id="audio" hidden></audio>
 
 		<!-- 引入脚本 -->
-		<script src="assets/components/require.js"></script>
-		<script src="assets/components/ContextMenu.js"></script>
-		<script src="assets/components/PublicConfig.js"></script>
-		<script src="assets/components/SimProgress.js"></script>
-		<script src="assets/components/SimAP.js"></script>
-		<script src="assets/components/SimLRC.js"></script>
-		<script src="assets/components/dialog.js"></script>
-		<script src="assets/components/marked.min.js"></script>
-		<script src="assets/main.js"></script>
+		<script src="js/require.js"></script>
+		<script src="js/ContextMenu.js"></script>
+		<script src="js/PublicConfig.js"></script>
+		<script src="js/SimProgress.js"></script>
+		<script src="js/SimAP.js"></script>
+		<script src="js/SimLRC.js"></script>
+		<script src="js/dialog.js"></script>
+		<script src="js/main.js"></script>
 	</body>
 </html>

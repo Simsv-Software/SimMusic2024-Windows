@@ -1,6 +1,7 @@
-@font-face{font-family:"icon";src:url("../icon.woff2");}
-@font-face{font-family:"windowsicon";src:url("../windowsicon.ttf");}
-@font-face{font-family:"font";src:url("../font.ttf");}
+@font-face{font-family:"icon";src:url("../assets/icon.woff2");}
+@font-face{font-family:"windowsicon";src:url("../assets/windowsicon.woff2");}
+@font-face{font-family:"font";font-weight:400;src:url("../assets/font.woff2");}
+@font-face{font-family:"font";font-weight:700;src:url("../assets/font-bold.woff2");}
 html{font-size:16px;user-select:none;font-family:"font","微软雅黑";background:#F9F9FB;}
 body{margin:0;}
 i{font-family:"icon";font-style:normal;}
@@ -20,7 +21,7 @@ header i:hover{background:rgba(0,0,0,.05);}
 header i:active{background:rgba(0,0,0,.1);opacity:.8;}
 header i#closeBtn:hover{background:#E81123;color:white;}
 header i#closeBtn:active{background:#E81123;color:rgba(255,255,255,.8);}
-main{position:fixed;inset:30px 40px;}
-main h1{margin-top:0;margin-bottom:10px;font-size:1.8em;}
-main .buttons{position:absolute;bottom:0;right:0;}
-input,select,textarea{background:white;padding:8px 10px;border-radius:5px;border:0;font-size:1rem;font-family:inherit;width:100%;margin:5px 0;resize:none;}
+form{position:fixed;inset:30px 40px;}
+form h1{margin-top:0;margin-bottom:10px;font-size:1.8em;}
+form .buttons{position:absolute;bottom:0;right:0;}
+input{background:white;padding:8px 10px;border-radius:5px;border:0;font-size:1rem;font-family:inherit;width:100%;margin:5px 0;}

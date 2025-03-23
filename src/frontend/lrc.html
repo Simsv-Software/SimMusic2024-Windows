@@ -28,7 +28,7 @@
 			<div id="text"><span id="inside"></span></div>
 		</div>
 
-		<script src="assets/components/PublicConfig.js"></script>
+		<script src="js/PublicConfig.js"></script>
 		<script>
 			const {ipcRenderer} = require("electron");
 			const lyrics = document.getElementById("lyrics");
@@ -96,9 +96,10 @@
 				else lyrics.style.left = screen.width / 2 - width / 2 + "px";
 				lyrics.style.top = config.getItem("desktopLyricsTop") - 10 + "px";
 			}
+			
 			ipcRenderer.on("lrcWinReload", reloadConfig);
-			ipcRenderer.on("lrcUpdate", (_event, lrc) => { inside.innerHTML = lrc; });
-			ipcRenderer.on("setHidden", (_event, id, hidden) => { document.getElementById(id).hidden = hidden; });
+			ipcRenderer.on("lrcUpdate", (_, lrc) => inside.innerHTML = lrc);
+			ipcRenderer.on("setHidden", (_, id, hidden) => document.getElementById(id).hidden = hidden);
 			reloadConfig();
 		</script>
 	</body>
