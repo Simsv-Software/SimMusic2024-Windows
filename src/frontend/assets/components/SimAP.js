@@ -346,7 +346,7 @@ const SimAPUI = {
 		this.playingAnimation = true;
 		setTimeout(() => {
 			document.body.classList.add("playerShown");
-			if (config.getItem("darkPlayer")) ipcRenderer.invoke("overlayWhite");
+			ipcRenderer.invoke("overlayColor", config.getItem("darkPlayer"));
 			const listActive = document.querySelector(".list div.active");
 			if (!listActive) document.querySelector(".list div").click();
 			document.querySelector(".list div.active").scrollIntoView({block: "center"});
@@ -359,7 +359,7 @@ const SimAPUI = {
 	hide() {
 		if (this.playingAnimation) return;
 		if (!document.body.classList.contains("playerShown")) return;
-		ipcRenderer.invoke("overlayBlack");
+		ipcRenderer.invoke("overlayColor", false);
 		SimAPUI.toggleFullScreen(true);
 		document.body.classList.remove("playerShown");
 		this.playingAnimation = true;
