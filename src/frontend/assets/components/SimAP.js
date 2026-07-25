@@ -148,59 +148,155 @@ const switchMusic = (playConfig) => {
 // 动态混色控制器
 const PlayerBackground = {
 	init() {
-		canvas = document.getElementById("backgroundAnimation");
-		this.ctx = canvas.getContext("2d");
-		canvas.width = window.innerWidth;
-		canvas.height = window.innerHeight;
-		window.addEventListener("resize", () => {
-			canvas.width = window.innerWidth;
-			canvas.height = window.innerHeight;
-		});
-		this.blobs = [];
-		this.animate(true);
-	},
-	animate(isInit) {
-		requestAnimationFrame(() => {PlayerBackground.animate();});
-		if (!config.getItem("backgroundBlur")) return;
-		if (!document.body.classList.contains("playing") && !isInit) return;
-		const ctx = PlayerBackground.ctx;
-		ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-		for (const blob of PlayerBackground.blobs) {
-			// 位移
-			blob.x += blob.dx;
-			blob.y += blob.dy;
-			if (blob.x - blob.radius < 0 || blob.x + blob.radius > window.innerWidth) blob.dx *= -1;
-			if (blob.y - blob.radius < 0 || blob.y + blob.radius > window.innerHeight) blob.dy *= -1;
+		const canvas = document.getElementById("backgroundAnimation");
+		const gl = canvas.getContext("webgl2");
+		if (!gl) return console.error("WebGL2 not supported");
+		this.canvas = canvas;
+		this.gl = gl;
+		this.colors = ["#000000", "#333333", "#666666", "#999999"];
+		this.pausedAt = 0;
+		this.offset = 0;
+		const scale = 0.5;
+		const resize = () => {
+			canvas.width = window.innerWidth * scale;
+			canvas.height = window.innerHeight * scale;
+			gl.viewport(0, 0, canvas.width, canvas.height);
+		};
+		window.addEventListener("resize", resize);
+		resize();
+		const vsSource = `#version 300 es
+		in vec2 aPos;
+		out vec2 vUv;
+		void main(){
+			vUv = (aPos+1.0)*0.5;
+			gl_Position = vec4(aPos,0.0,1.0);
+		}`;
+		const fsSource = `#version 300 es
+		precision highp float;
+		in vec2 vUv;
+		out vec4 fragColor;
+		uniform float uTime;
+		uniform vec2 uRes;
+		uniform vec3 uColors[4];
+
+		float fbm(vec2 p){
+			float v = 0.0;
+			float a = 0.5;
+			for(int i=0;i<2;i++){
+				v += a * sin(p.x*0.8 + float(i)*1.5) * cos(p.y*0.9 + float(i)*1.3);
+				p *= 1.3;
+				a *= 0.5;
+			}
+			return v*0.5 + 0.5;
 		}
-		PlayerBackground.drawBlobs();
+
+		vec3 palette(float t){
+			float f = t * 3.0;
+			int idx = int(floor(f));
+			float blend = fract(f);
+			vec3 c1 = uColors[idx];
+			vec3 c2 = uColors[min(idx+1, 3)];
+			return mix(c1,c2,blend);
+		}
+
+		void main(){
+			vec2 uv = vUv * 2.0;
+			float t = uTime*0.25;
+
+			vec2 p = uv;
+			p += 0.04*vec2(
+				sin(p.y*1.2 + t),
+				cos(p.x*1.3 - t)
+			);
+
+			float f = fbm(p + vec2(t*0.3, -t*0.2));
+			f = smoothstep(0.2,0.8,f);
+
+			vec3 col = palette(f);
+			fragColor = vec4(col,1.0);
+		}`;
+		const createShader = (type, source) => {
+			const shader = gl.createShader(type);
+			gl.shaderSource(shader, source);
+			gl.compileShader(shader);
+			if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+				console.error(gl.getShaderInfoLog(shader));
+				gl.deleteShader(shader);
+				return null;
+			}
+			return shader;
+		};
+		const vs = createShader(gl.VERTEX_SHADER, vsSource);
+		const fs = createShader(gl.FRAGMENT_SHADER, fsSource);
+		if (!vs || !fs) return;
+		const program = gl.createProgram();
+		gl.attachShader(program, vs);
+		gl.attachShader(program, fs);
+		gl.linkProgram(program);
+		if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+			console.error(gl.getProgramInfoLog(program));
+			return;
+		}
+		this.program = program;
+		this.aPos = gl.getAttribLocation(program, "aPos");
+		this.uTime = gl.getUniformLocation(program, "uTime");
+		this.uRes = gl.getUniformLocation(program, "uRes");
+		this.uColors = gl.getUniformLocation(program, "uColors");
+		const quad = new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]);
+		const vbo = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+		gl.bufferData(gl.ARRAY_BUFFER, quad, gl.STATIC_DRAW);
+		this.vbo = vbo;
+		this.animate();
+	},
+	animate() {
+		requestAnimationFrame(() => { PlayerBackground.animate(); });
+		if (!config.getItem("backgroundBlur")) return;
+		const playing = document.body.classList.contains("playing");
+		if (!playing) {
+			if (this.pausedAt === 0) this.pausedAt = performance.now();
+			return;
+		}
+		if (this.pausedAt !== 0) {
+			this.offset += performance.now() - this.pausedAt;
+			this.pausedAt = 0;
+		}
+		this.renderFrame();
+	},
+	renderFrame() {
+		if (!this.gl) return;
+		const gl = this.gl;
+		const canvas = this.canvas;
+		const t = (performance.now() - this.offset) * 0.001;
+		gl.viewport(0, 0, canvas.width, canvas.height);
+		gl.clear(gl.COLOR_BUFFER_BIT);
+		gl.useProgram(this.program);
+		gl.uniform1f(this.uTime, t);
+		gl.uniform2f(this.uRes, canvas.width, canvas.height);
+		const colorData = [];
+		for (let c of this.colors) {
+			colorData.push(parseInt(c.slice(1, 3), 16) / 255);
+			colorData.push(parseInt(c.slice(3, 5), 16) / 255);
+			colorData.push(parseInt(c.slice(5, 7), 16) / 255);
+		}
+		gl.uniform3fv(this.uColors, colorData);
+		gl.enableVertexAttribArray(this.aPos);
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
+		gl.vertexAttribPointer(this.aPos, 2, gl.FLOAT, false, 0, 0);
+		gl.drawArrays(gl.TRIANGLES, 0, 6);
+	},
+	rgbToHex(rgb) {
+		const m = rgb.match(/\d+/g);
+		if (!m) return "#000000";
+		return "#" + m.slice(0, 3).map(v => (+v).toString(16).padStart(2, "0")).join("");
 	},
 	update(mainColor, subColors) {
 		document.getElementById("background").style.background = mainColor;
-		this.mainColor = mainColor;
-		this.blobs = [];
-		for (let i = 0; i < 3; i++) {
-			this.blobs.push({
-				x: Math.random() * canvas.width,
-				y: Math.random() * canvas.height,
-				radius: Math.random() * screen.width / 3 + screen.width / 5,
-				color: subColors[i],
-				dx: ((Math.random() < 0.5) ? 1 : -1) * (Math.random() * 0.5 + 0.5),
-				dy: ((Math.random() < 0.5) ? 1 : -1) * (Math.random() * 0.5 + 0.5),
-			});
-		}
-		PlayerBackground.drawBlobs();
-	},
-	drawBlobs() {
-		const ctx = PlayerBackground.ctx;
-		for (const blob of PlayerBackground.blobs) {
-			ctx.beginPath();
-			const gradient = ctx.createRadialGradient(blob.x, blob.y, 0, blob.x, blob.y, blob.radius);
-			gradient.addColorStop(0, blob.color);
-			gradient.addColorStop(1, "transparent");
-			ctx.fillStyle = gradient;
-			ctx.arc(blob.x, blob.y, blob.radius, 0, Math.PI * 2);
-			ctx.fill();
-		}
+		this.colors = [
+			this.rgbToHex(mainColor),
+			...subColors.map(c => this.rgbToHex(c))
+		];
+		this.renderFrame();
 	}
 }
 PlayerBackground.init();
