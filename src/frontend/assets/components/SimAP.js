@@ -261,6 +261,10 @@ const PlayerBackground = {
 			this.offset += performance.now() - this.pausedAt;
 			this.pausedAt = 0;
 		}
+		this.renderFrame();
+	},
+	renderFrame() {
+		if (!this.gl) return;
 		const gl = this.gl;
 		const canvas = this.canvas;
 		const t = (performance.now() - this.offset) * 0.001;
@@ -292,6 +296,7 @@ const PlayerBackground = {
 			this.rgbToHex(mainColor),
 			...subColors.map(c => this.rgbToHex(c))
 		];
+		this.renderFrame();
 	}
 }
 PlayerBackground.init();
