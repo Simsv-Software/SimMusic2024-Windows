@@ -176,6 +176,7 @@ const PlayerBackground = {
 		in vec2 vUv;
 		out vec4 fragColor;
 		uniform float uTime;
+		uniform vec2 uRes;
 		uniform vec3 uColors[4];
 
 		float fbm(vec2 p){
@@ -239,35 +240,35 @@ const PlayerBackground = {
 		this.program = program;
 		this.aPos = gl.getAttribLocation(program, "aPos");
 		this.uTime = gl.getUniformLocation(program, "uTime");
+		this.uRes = gl.getUniformLocation(program, "uRes");
 		this.uColors = gl.getUniformLocation(program, "uColors");
 		const quad = new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]);
 		const vbo = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
 		gl.bufferData(gl.ARRAY_BUFFER, quad, gl.STATIC_DRAW);
 		this.vbo = vbo;
-		this.animate(true);
+		this.animate();
 	},
-	animate(isInit) {
+	animate() {
 		requestAnimationFrame(() => { PlayerBackground.animate(); });
 		if (!config.getItem("backgroundBlur")) return;
-		if (!document.body.classList.contains("playing") && !isInit) return;
-		const gl = this.gl;
-		const canvas = this.canvas;
-		const paused = !document.body.classList.contains("playing");
-		if (paused) {
+		const playing = document.body.classList.contains("playing");
+		if (!playing) {
 			if (this.pausedAt === 0) this.pausedAt = performance.now();
 			return;
-		} else {
-			if (this.pausedAt !== 0) {
-				this.offset += performance.now() - this.pausedAt;
-				this.pausedAt = 0;
-			}
 		}
+		if (this.pausedAt !== 0) {
+			this.offset += performance.now() - this.pausedAt;
+			this.pausedAt = 0;
+		}
+		const gl = this.gl;
+		const canvas = this.canvas;
 		const t = (performance.now() - this.offset) * 0.001;
 		gl.viewport(0, 0, canvas.width, canvas.height);
 		gl.clear(gl.COLOR_BUFFER_BIT);
 		gl.useProgram(this.program);
 		gl.uniform1f(this.uTime, t);
+		gl.uniform2f(this.uRes, canvas.width, canvas.height);
 		const colorData = [];
 		for (let c of this.colors) {
 			colorData.push(parseInt(c.slice(1, 3), 16) / 255);
